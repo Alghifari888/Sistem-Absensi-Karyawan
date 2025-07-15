@@ -6,56 +6,67 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">
                         Selamat datang, {{ Auth::user()->name }}!
                     </h3>
 
                     {{-- Tampilkan Notifikasi --}}
                     @if (session('status'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                            <span class="block sm:inline">{{ session('status') }}</span>
+                        {{-- Notifikasi Sukses --}}
+                        <div id="alert-success" class="flex items-center p-4 mb-4 text-green-800 rounded-lg bg-green-50" role="alert">
+                           {{-- icon & text --}}
+                           <span class="sr-only">Info</span>
+                           <div>
+                             <span class="font-medium">Sukses!</span> {{ session('status') }}
+                           </div>
                         </div>
                     @endif
                     @if (session('error'))
-                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                            <span class="block sm:inline">{{ session('error') }}</span>
-                        </div>
+                         {{-- Notifikasi Error --}}
+                         <div id="alert-error" class="flex items-center p-4 mb-4 text-red-800 rounded-lg bg-red-50" role="alert">
+                            {{-- icon & text --}}
+                            <span class="sr-only">Info</span>
+                            <div>
+                              <span class="font-medium">Gagal!</span> {{ session('error') }}
+                            </div>
+                         </div>
                     @endif
 
                     <div class="mt-6 border-t border-gray-200 pt-6">
                         <div class="text-center">
                             <p class="text-lg font-semibold">Absensi Hari Ini: {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
                             <p id="clock" class="text-4xl font-bold my-2"></p>
-                            <p id="location-info" class="text-sm text-gray-500">Mendapatkan lokasi Anda...</p>
+                            
+                            {{-- Status Absensi --}}
+                            @if ($todayAttendance && $todayAttendance->check_out_time)
+                                {{-- Jika sudah absen masuk dan pulang --}}
+                                <p class="text-blue-600 font-semibold">Anda sudah menyelesaikan absensi hari ini.</p>
+                                <p class="text-sm">Masuk: {{ \Carbon\Carbon::parse($todayAttendance->check_in_time)->format('H:i') }} | Pulang: {{ \Carbon\Carbon::parse($todayAttendance->check_out_time)->format('H:i') }}</p>
+                            @elseif ($todayAttendance)
+                                {{-- Jika sudah absen masuk tapi belum pulang --}}
+                                <p class="text-green-600 font-semibold">Anda sudah absen masuk pada jam {{ \Carbon\Carbon::parse($todayAttendance->check_in_time)->format('H:i') }}</p>
+                            @endif
 
-                            {{-- Form Absensi --}}
-                            <form id="attendance-form" method="POST" action="{{ route('karyawan.attendance.store') }}" class="mt-4">
-                                @csrf
-                                <input type="hidden" name="location" id="location">
+                            {{-- Tombol Aksi & Form --}}
+                            @if (!$todayAttendance || !$todayAttendance->check_out_time)
+                                <div id="scanner-container" class="w-full max-w-sm mx-auto my-4 border-2 border-dashed rounded-lg p-2" style="display: none;">
+                                    <div id="qr-reader"></div>
+                                </div>
+    
+                                <form id="attendance-form" method="POST" action="{{ route('karyawan.attendance.store') }}" class="hidden">
+                                    @csrf
+                                    <input type="hidden" name="location" id="location">
+                                    <input type="hidden" name="qr_token" id="qr_token">
+                                </form>
 
-                                {{-- Logika Tombol Absen --}}
-                                @if (!$todayAttendance)
-                                    {{-- Jika belum absen masuk sama sekali --}}
-                                    <x-primary-button id="submit-button" disabled>
-                                        <div id="button-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                                        Absen Masuk
-                                    </x-primary-button>
-                                @elseif (!$todayAttendance->check_out_time)
-                                    {{-- Jika sudah absen masuk tapi belum absen pulang --}}
-                                    <p class="text-green-600 font-semibold">Anda sudah absen masuk pada jam {{ \Carbon\Carbon::parse($todayAttendance->check_in_time)->format('H:i') }}</p>
-                                    <x-primary-button id="submit-button" class="mt-2 bg-red-600 hover:bg-red-700 focus:bg-red-700 active:bg-red-800" disabled>
-                                         <div id="button-spinner" class="hidden animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                                        Absen Pulang
-                                    </x-primary-button>
-                                @else
-                                    {{-- Jika sudah absen masuk dan pulang --}}
-                                    <p class="text-blue-600 font-semibold">Anda sudah menyelesaikan absensi hari ini.</p>
-                                    <p class="text-sm">Masuk: {{ \Carbon\Carbon::parse($todayAttendance->check_in_time)->format('H:i') }} | Pulang: {{ \Carbon\Carbon::parse($todayAttendance->check_out_time)->format('H:i') }}</p>
-                                @endif
-                            </form>
+                                <x-primary-button id="scan-button">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM12 4v.01"></path></svg>
+                                    {{ !$todayAttendance ? 'Scan QR Absen Masuk' : 'Scan QR Absen Pulang' }}
+                                </x-primary-button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -64,15 +75,12 @@
     </div>
 
     @push('scripts')
+    {{-- Library untuk QR Scanner --}}
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // ... (fungsi jam digital & notifikasi sama seperti sebelumnya)
             const clockElement = document.getElementById('clock');
-            const locationElement = document.getElementById('location');
-            const locationInfoElement = document.getElementById('location-info');
-            const submitButton = document.getElementById('submit-button');
-            const buttonSpinner = document.getElementById('button-spinner');
-
-            // Fungsi untuk update jam digital
             function updateClock() {
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
@@ -80,66 +88,78 @@
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 clockElement.textContent = `${hours}:${minutes}:${seconds}`;
             }
-
-            // Panggil updateClock setiap detik
             setInterval(updateClock, 1000);
-            updateClock(); // Panggil sekali saat load
+            updateClock();
 
-            // Fungsi untuk mendapatkan lokasi GPS
-            function getLocation() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(showPosition, showError);
-                } else {
-                    locationInfoElement.textContent = "Geolocation tidak didukung oleh browser ini.";
-                    locationInfoElement.classList.replace('text-gray-500', 'text-red-500');
-                }
-            }
+            // Sembunyikan notifikasi setelah 5 detik
+            setTimeout(() => {
+                document.getElementById('alert-success')?.remove();
+                document.getElementById('alert-error')?.remove();
+            }, 5000);
 
-            function showPosition(position) {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-                const locationString = `${lat},${lon}`;
-                
-                locationElement.value = locationString;
-                locationInfoElement.textContent = `Lokasi Anda: ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-                locationInfoElement.classList.replace('text-gray-500', 'text-green-500');
-                if(submitButton) {
-                    submitButton.disabled = false; // Aktifkan tombol jika lokasi berhasil didapat
-                }
-            }
+            // ======================================================
+            //           LOGIKA BARU UNTUK QR SCANNER
+            // ======================================================
+            const scanButton = document.getElementById('scan-button');
+            const scannerContainer = document.getElementById('scanner-container');
+            let html5QrCode;
 
-            function showError(error) {
-                let errorMessage = "Terjadi kesalahan saat mengambil lokasi.";
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        errorMessage = "Anda menolak permintaan untuk Geolocation.";
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage = "Informasi lokasi tidak tersedia.";
-                        break;
-                    case error.TIMEOUT:
-                        errorMessage = "Permintaan untuk mendapatkan lokasi pengguna timeout.";
-                        break;
-                    case error.UNKNOWN_ERROR:
-                        errorMessage = "Terjadi kesalahan yang tidak diketahui.";
-                        break;
-                }
-                locationInfoElement.textContent = errorMessage;
-                locationInfoElement.classList.replace('text-gray-500', 'text-red-500');
-            }
+            if (scanButton) {
+                scanButton.addEventListener('click', function() {
+                    scannerContainer.style.display = 'block'; // Tampilkan container scanner
+                    this.style.display = 'none'; // Sembunyikan tombol scan
 
-            // Panggil fungsi getLocation saat halaman dimuat
-            getLocation();
-
-            // Menampilkan spinner saat form disubmit
-            const attendanceForm = document.getElementById('attendance-form');
-            if (attendanceForm) {
-                attendanceForm.addEventListener('submit', function() {
-                    if(submitButton) {
-                        submitButton.disabled = true;
-                        buttonSpinner.classList.remove('hidden');
+                    if (!html5QrCode) {
+                        html5QrCode = new Html5Qrcode("qr-reader");
                     }
+                    
+                    html5QrCode.start(
+                        { facingMode: "environment" }, // Gunakan kamera belakang
+                        {
+                            fps: 10,    // Optional, frame per second
+                            qrbox: { width: 250, height: 250 }  // Optional, ukuran box scan
+                        },
+                        onScanSuccess,
+                        onScanFailure
+                    ).catch(err => {
+                        alert("Tidak dapat memulai kamera. Pastikan Anda memberikan izin.");
+                        console.error(err);
+                        // Kembalikan tombol jika gagal memulai kamera
+                        scannerContainer.style.display = 'none';
+                        scanButton.style.display = 'inline-flex';
+                    });
                 });
+            }
+
+            function onScanSuccess(decodedText, decodedResult) {
+                // Handle a successful scan
+                console.log(`Scan result: ${decodedText}`, decodedResult);
+                
+                // Hentikan scanner
+                html5QrCode.stop().then(ignore => {
+                    scannerContainer.style.display = 'none';
+                    scanButton.style.display = 'inline-flex';
+                    
+                    // Isi form dan submit
+                    document.getElementById('qr_token').value = decodedText;
+                    
+                    // Dapatkan lokasi GPS sebelum submit
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const locationString = `${position.coords.latitude},${position.coords.longitude}`;
+                        document.getElementById('location').value = locationString;
+                        
+                        // Submit form
+                        document.getElementById('attendance-form').submit();
+                    }, () => {
+                        alert('Gagal mendapatkan lokasi GPS. Pastikan izin lokasi aktif.');
+                    });
+
+                }).catch(err => console.error(err));
+            }
+
+            function onScanFailure(error) {
+                // handle scan failure, usually better to ignore and keep scanning.
+                // console.warn(`Code scan error = ${error}`);
             }
         });
     </script>

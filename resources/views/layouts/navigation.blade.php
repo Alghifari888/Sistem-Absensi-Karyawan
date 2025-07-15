@@ -13,15 +13,16 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    {{-- ====================================================== --}}
-                    {{-- PENAMBAHAN MENU PENGATURAN HANYA UNTUK ADMIN --}}
-                    {{-- ====================================================== --}}
-                    @if(auth()->user()->isAdmin())
-                        <x-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.index')">
-                            {{ __('Pengaturan') }}
-                        </x-nav-link>
-                    @endif
-                    {{-- ====================================================== --}}
+                    {{-- ... Menu Pengaturan ... --}}
+@if(auth()->user()->isAdmin())
+    <x-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.index')">
+        {{ __('Pengaturan') }}
+    </x-nav-link>
+    {{-- MENU BARU UNTUK QR CODE --}}
+    <x-nav-link :href="route('admin.qrcode.show')" :active="request()->routeIs('admin.qrcode.show')">
+        {{ __('QR Code Absensi') }}
+    </x-nav-link>
+@endif
 
                 </div>
             </div>

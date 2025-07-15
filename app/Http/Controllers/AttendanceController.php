@@ -11,52 +11,53 @@ use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
+        // 1. Validasi Input Dasar
         $request->validate([
             'location' => 'required|string',
+            'qr_token' => 'required|string',
         ]);
-
-        $settings = Setting::all()->keyBy('key');
-        
-        // ======================================================
-        // VALIDASI JARAK LOKASI (GPS)
-        // ======================================================
-
-        // Ambil pengaturan lokasi & radius dari database
-        $lokasiKantorLat = $settings['lokasi_kantor_lat']->value ?? null;
-        $lokasiKantorLon = $settings['lokasi_kantor_lon']->value ?? null;
-        $radiusAbsensi = $settings['radius_absensi']->value ?? 100;
-
-        // Pisahkan latitude dan longitude dari request
-        list($latitude, $longitude) = explode(',', $request->location);
-        
-        // Cek jika pengaturan lokasi kantor sudah ada
-        if ($lokasiKantorLat && $lokasiKantorLon) {
-            // Panggil fungsi helper untuk menghitung jarak
-            $jarak = calculateDistance(
-                $latitude,
-                $longitude,
-                $lokasiKantorLat,
-                $lokasiKantorLon
-            );
-
-            // Jika jarak lebih besar dari radius yang diizinkan, tolak absensi
-            if ($jarak > $radiusAbsensi) {
-                return Redirect::back()->with('error', "Anda berada di luar radius yang diizinkan. Jarak Anda " . round($jarak) . " meter dari kantor.");
-            }
-        }
-        
-        // ======================================================
-        // VALIDASI WAKTU
-        // ======================================================
-        
-        $jamMasukSetting = $settings['jam_masuk']->value ?? '08:00:00';
-        $jamPulangSetting = $settings['jam_pulang']->value ?? '17:00:00';
 
         $now = Carbon::now();
         $today = $now->toDateString();
         $userId = Auth::id();
+
+        // 2. Validasi Token QR Code
+        $qrTokenKey = 'qr_token_' . $today;
+        $validToken = Setting::where('key', $qrTokenKey)->value('value');
+
+        if (!$validToken || $request->qr_token !== $validToken) {
+            return Redirect::back()->with('error', 'QR Code tidak valid atau sudah kedaluwarsa.');
+        }
+
+        // Ambil semua pengaturan sekaligus untuk efisiensi
+        $settings = Setting::all()->keyBy('key');
+
+        // 3. Validasi Jarak Lokasi (GPS)
+        $lokasiKantorLat = $settings['lokasi_kantor_lat']->value ?? null;
+        $lokasiKantorLon = $settings['lokasi_kantor_lon']->value ?? null;
+        $radiusAbsensi = $settings['radius_absensi']->value ?? 100; // Default 100 meter
+
+        list($latitude, $longitude) = explode(',', $request->location);
+        
+        if ($lokasiKantorLat && $lokasiKantorLon) {
+            $jarak = calculateDistance($latitude, $longitude, $lokasiKantorLat, $lokasiKantorLon);
+
+            if ($jarak > $radiusAbsensi) {
+                return Redirect::back()->with('error', "Anda berada di luar radius. Jarak Anda " . round($jarak) . " meter dari kantor.");
+            }
+        }
+        
+        // 4. Validasi Waktu & Proses Absensi
+        $jamMasukSetting = $settings['jam_masuk']->value ?? '08:00:00';
+        $jamPulangSetting = $settings['jam_pulang']->value ?? '17:00:00';
 
         $attendance = Attendance::where('user_id', $userId)
                                 ->where('attendance_date', $today)

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\Admin\QrCodeController;
 
 // Halaman landing page utama
 Route::get('/', function () {
@@ -32,6 +33,7 @@ Route::middleware('auth')->group(function () {
         // ROUTE UNTUK PENGATURAN (SUDAH DIPERBAIKI)
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+         Route::get('/qrcode', [QrCodeController::class, 'show'])->name('qrcode.show'); // <-- ROUTE BARU
     });
 
     // GROUPING ROUTE UNTUK ROLE ATASAN
