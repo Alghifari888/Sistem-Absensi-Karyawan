@@ -29,6 +29,8 @@ class SettingController extends Controller
             'jam_masuk',
             'jam_pulang',
             'radius_absensi',
+            'lokasi_kantor_lat',
+            'lokasi_kantor_lon',
         ];
 
         foreach ($keys as $key) {

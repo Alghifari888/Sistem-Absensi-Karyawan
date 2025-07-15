@@ -33,9 +33,21 @@
                                 <x-input-error :messages="$errors->get('jam_pulang')" class="mt-2" />
                             </div>
 
+                            <div>
+                                <x-input-label for="lokasi_kantor_lat" :value="__('Latitude Kantor')" />
+                                <x-text-input id="lokasi_kantor_lat" class="block mt-1 w-full" type="text" name="lokasi_kantor_lat" :value="old('lokasi_kantor_lat', $settings['lokasi_kantor_lat']->value ?? '')" placeholder="-6.224855" required />
+                                <x-input-error :messages="$errors->get('lokasi_kantor_lat')" class="mt-2" />
+                            </div>
+
+                            <div>
+                                <x-input-label for="lokasi_kantor_lon" :value="__('Longitude Kantor')" />
+                                <x-text-input id="lokasi_kantor_lon" class="block mt-1 w-full" type="text" name="lokasi_kantor_lon" :value="old('lokasi_kantor_lon', $settings['lokasi_kantor_lon']->value ?? '')" placeholder="106.822295" required />
+                                <x-input-error :messages="$errors->get('lokasi_kantor_lon')" class="mt-2" />
+                            </div>
+
                             <div class="md:col-span-2">
                                 <x-input-label for="radius_absensi" :value="__('Radius Toleransi Absensi (meter)')" />
-                                <x-text-input id="radius_absensi" class="block mt-1 w-full" type="number" name="radius_absensi" :value="old('radius_absensi', $settings['radius_absensi']->value ?? '')" required />
+                                <x-text-input id="radius_absensi" class="block mt-1 w-full" type="number" name="radius_absensi" :value="old('radius_absensi', $settings['radius_absensi']->value ?? '')" placeholder="100" required />
                                 <x-input-error :messages="$errors->get('radius_absensi')" class="mt-2" />
                             </div>
                         </div>

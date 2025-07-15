@@ -2,7 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SettingController; // <-- Tambahkan ini
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\AttendanceController;
 
 // Halaman landing page utama
 Route::get('/', function () {
@@ -23,15 +24,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // GROUPING ROUTE UNTUK ROLE ADMIN
-Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
-    
-    // ROUTE BARU UNTUK PENGATURAN
-    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
-    Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
-});
+    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('dashboard');
+        
+        // ROUTE UNTUK PENGATURAN (SUDAH DIPERBAIKI)
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+    });
 
     // GROUPING ROUTE UNTUK ROLE ATASAN
     Route::middleware('role:atasan')->prefix('atasan')->name('atasan.')->group(function () {
@@ -44,9 +45,16 @@ Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function
     // GROUPING ROUTE UNTUK ROLE KARYAWAN
     Route::middleware('role:karyawan')->prefix('karyawan')->name('karyawan.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('karyawan.dashboard');
+            // Ambil data absensi hari ini untuk ditampilkan di dashboard
+            $todayAttendance = \App\Models\Attendance::where('user_id', auth()->id())
+                ->where('attendance_date', now()->toDateString())
+                ->first();
+                
+            return view('karyawan.dashboard', compact('todayAttendance'));
         })->name('dashboard');
-        // Nanti route-route karyawan lainnya ditaruh di sini
+        
+        // ROUTE BARU UNTUK PROSES ABSENSI
+        Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
     });
 });
 

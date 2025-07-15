@@ -28,7 +28,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // LOGIKA REDIRECT BERDASARKAN ROLE
+        // LOGIKA PENGALIHAN BERDASARKAN ROLE PENGGUNA
         $user = $request->user();
 
         if ($user->isAdmin()) {
@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('karyawan.dashboard'));
         }
 
-        // Fallback jika user tidak punya role (seharusnya tidak terjadi)
+        // Pengalihan default jika tidak ada role yang cocok
         return redirect()->intended(route('dashboard'));
     }
 
