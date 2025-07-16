@@ -7,6 +7,21 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {{-- ====================================================== --}}
+            {{--         PANEL INFORMASI PANDUAN LEMBUR BARU          --}}
+            {{-- ====================================================== --}}
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
+                <div class="flex">
+                    <div class="py-1"><x-heroicon-s-information-circle class="h-6 w-6 text-blue-500 mr-4"/></div>
+                    <div>
+                        <p class="font-bold">Panduan Pengajuan Lembur</p>
+                        <p class="text-sm">
+                            Pastikan pengajuan lembur dilakukan pada **waktu istirahat** yang telah ditentukan. Lembur hanya akan disetujui untuk keperluan mendesak dengan **alasan yang jelas dan detail**.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     
@@ -37,7 +52,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {{-- PERBAIKAN: Menggunakan variabel $overtimes, bukan $leaves --}}
                                 @forelse ($overtimes as $overtime)
                                     <tr class="text-center">
                                         <td class="py-2 px-4 border-b">{{ \Carbon\Carbon::parse($overtime->overtime_date)->format('d/m/Y') }}</td>

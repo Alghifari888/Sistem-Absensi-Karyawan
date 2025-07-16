@@ -7,31 +7,27 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div x-data="{ sidebarOpen: false }" class="flex h-screen bg-gray-100">
-            <!-- Sidebar -->
+        <div x-data="{ sidebarOpen: window.innerWidth > 768 }" @resize.window="sidebarOpen = window.innerWidth > 768" class="flex h-screen bg-gray-100">
             <aside 
-                class="fixed inset-y-0 left-0 z-30 w-64 bg-gray-800 text-gray-300 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0"
+                class="fixed inset-y-0 left-0 z-40 w-64 bg-gray-900 text-gray-300 transform transition-transform duration-300 ease-in-out"
                 :class="{'translate-x-0': sidebarOpen, '-translate-x-full': !sidebarOpen}"
             >
-                <!-- Logo -->
                 <div class="flex items-center justify-center h-20 border-b border-gray-700">
-                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-2 text-white">
-                        <x-application-logo class="block h-10 w-auto fill-current" />
-                        <span class="font-bold text-xl">Absensi App</span>
+                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 text-white px-4">
+                        {{-- Ganti src dengan path logo Anda. Contoh: src="{{ asset('images/logo.png') }}" --}}
+                       <img src="{{ asset('images/logo.png') }}" alt="Logo Perusahaan" class="h-10 w-10 rounded-full object-cover">
+                        <span class="font-bold text-xl">{{ config('app.name', 'Laravel') }}</span>
                     </a>
                 </div>
                 
-                <!-- Navigation Links -->
                 <nav class="flex-1 px-4 py-4 space-y-2">
-                    <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('*.dashboard')">
+                     <x-sidebar-link :href="route('dashboard')" :active="request()->routeIs('*.dashboard')">
                         <x-heroicon-s-home class="w-6 h-6 mr-3" />
                         <span>Dashboard</span>
                     </x-sidebar-link>
@@ -96,24 +92,24 @@
                 </nav>
             </aside>
 
-            <div class="flex-1 flex flex-col overflow-hidden">
-                <!-- Top bar -->
-                <header class="flex justify-between items-center p-4 bg-white border-b">
-                    <!-- Hamburger -->
-                    <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 focus:outline-none md:hidden">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                        </svg>
-                    </button>
-                    
-                    <!-- Header Title -->
-                    <div class="font-semibold text-xl text-gray-800 leading-tight">
-                        @if (isset($header))
-                            {{ $header }}
-                        @endif
+            <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 bg-black opacity-50 z-30 md:hidden"></div>
+
+            <div class="flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out" :class="{'md:ml-64': sidebarOpen}">
+                <header class="flex justify-between items-center p-4 bg-white border-b z-20">
+                    <div class="flex items-center">
+                        <button @click="sidebarOpen = !sidebarOpen" class="text-gray-500 focus:outline-none">
+                            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </button>
+                        
+                        <div class="font-semibold text-xl text-gray-800 leading-tight ml-4">
+                            @if (isset($header))
+                                {{ $header }}
+                            @endif
+                        </div>
                     </div>
                     
-                    <!-- User Dropdown -->
                     <div class="relative">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
@@ -142,8 +138,7 @@
                     </div>
                 </header>
 
-                <!-- Main content -->
-                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
                     {{ $slot }}
                 </main>
             </div>
