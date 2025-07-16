@@ -12,16 +12,12 @@ class EnsureUserHasRole
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  $role  Role yang diizinkan untuk mengakses route.
+     * @param  array<string>  $roles  Daftar role yang diizinkan.
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // Cek apakah user sudah login DAN rolenya sesuai dengan yang diizinkan.
-        // Fungsi helper (isAdmin, isAtasan, isKaryawan) yang kita buat tadi tidak bisa dipakai di sini
-        // karena middleware tidak tahu instance user mana yang harus dicek.
-        // Jadi kita menggunakan $request->user()->role secara langsung.
-        if (! $request->user() || $request->user()->role !== $role) {
-            // Jika tidak sesuai, lempar ke halaman 403 (Forbidden/Akses Ditolak)
+        // Cek jika user sudah login DAN rolenya ada di dalam daftar role yang diizinkan.
+        if (! $request->user() || ! in_array($request->user()->role, $roles)) {
             abort(403, 'ANDA TIDAK PUNYA AKSES.');
         }
 

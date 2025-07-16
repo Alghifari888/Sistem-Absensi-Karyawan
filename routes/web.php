@@ -8,7 +8,8 @@ use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Karyawan\OvertimeController as KaryawanOvertimeController;
 use App\Http\Controllers\Atasan\OvertimeController as AtasanOvertimeController;
 use App\Http\Controllers\Karyawan\LeaveController as KaryawanLeaveController;
-use App\Http\Controllers\Atasan\LeaveController as AtasanLeaveController; // <-- Pastikan baris ini ada
+use App\Http\Controllers\Atasan\LeaveController as AtasanLeaveController;
+use App\Http\Controllers\Laporan\AbsensiController as LaporanAbsensiController;
 
 // Halaman landing page utama
 Route::get('/', function () {
@@ -54,12 +55,10 @@ Route::middleware('auth')->group(function () {
             return view('atasan.dashboard');
         })->name('dashboard');
         
-        // Route untuk Lembur Atasan
         Route::get('overtime', [AtasanOvertimeController::class, 'index'])->name('overtime.index');
         Route::get('overtime/{overtime}/edit', [AtasanOvertimeController::class, 'edit'])->name('overtime.edit');
         Route::put('overtime/{overtime}', [AtasanOvertimeController::class, 'update'])->name('overtime.update');
 
-        // Route untuk Cuti/Izin Atasan
         Route::get('leaves', [AtasanLeaveController::class, 'index'])->name('leaves.index');
         Route::get('leaves/{leave}/edit', [AtasanLeaveController::class, 'edit'])->name('leaves.edit');
         Route::put('leaves/{leave}', [AtasanLeaveController::class, 'update'])->name('leaves.update');
@@ -76,15 +75,20 @@ Route::middleware('auth')->group(function () {
         
         Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
         
-        // Route untuk Lembur Karyawan
         Route::get('overtime', [KaryawanOvertimeController::class, 'index'])->name('overtime.index');
         Route::get('overtime/create', [KaryawanOvertimeController::class, 'create'])->name('overtime.create');
         Route::post('overtime', [KaryawanOvertimeController::class, 'store'])->name('overtime.store');
 
-        // Route untuk Cuti/Izin Karyawan
         Route::get('leaves', [KaryawanLeaveController::class, 'index'])->name('leaves.index');
         Route::get('leaves/create', [KaryawanLeaveController::class, 'create'])->name('leaves.create');
         Route::post('leaves', [KaryawanLeaveController::class, 'store'])->name('leaves.store');
+    });
+
+    // ======================================================
+    //         ROUTE BARU UNTUK SEMUA LAPORAN
+    // ======================================================
+    Route::middleware(['role:admin,atasan'])->prefix('laporan')->name('laporan.')->group(function() {
+        Route::get('absensi', [LaporanAbsensiController::class, 'index'])->name('absensi.index');
     });
 });
 
