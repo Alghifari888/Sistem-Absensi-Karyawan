@@ -11,7 +11,9 @@
                 <div class="p-6 text-gray-900">
                     
                     @if (session('status'))
-                        {{-- Notifikasi Sukses --}}
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline">{{ session('status') }}</span>
+                        </div>
                     @endif
 
                     <div class="overflow-x-auto">
@@ -21,6 +23,7 @@
                                     <th class="py-2 px-4 border-b">Karyawan</th>
                                     <th class="py-2 px-4 border-b">Jenis</th>
                                     <th class="py-2 px-4 border-b">Tanggal</th>
+                                    <th class="py-2 px-4 border-b">Bukti</th>
                                     <th class="py-2 px-4 border-b">Status</th>
                                     <th class="py-2 px-4 border-b">Aksi</th>
                                 </tr>
@@ -31,6 +34,13 @@
                                         <td class="py-2 px-4 border-b">{{ $leave->user->name }}</td>
                                         <td class="py-2 px-4 border-b">{{ ucfirst($leave->type) }}</td>
                                         <td class="py-2 px-4 border-b">{{ \Carbon\Carbon::parse($leave->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($leave->end_date)->format('d/m/Y') }}</td>
+                                        <td class="py-2 px-4 border-b">
+                                            @if($leave->proof_document)
+                                                <a href="{{ asset('storage/' . $leave->proof_document) }}" target="_blank" class="text-blue-600 hover:underline">Lihat</a>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td class="py-2 px-4 border-b">
                                             @if($leave->status == 'pending')
                                                 <span class="bg-yellow-200 text-yellow-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">Pending</span>
@@ -46,7 +56,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center py-4">Tidak ada pengajuan.</td>
+                                        <td colspan="6" class="text-center py-4">Tidak ada pengajuan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

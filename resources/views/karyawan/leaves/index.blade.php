@@ -28,6 +28,7 @@
                                     <th class="py-2 px-4 border-b">Tanggal</th>
                                     <th class="py-2 px-4 border-b">Bukti</th>
                                     <th class="py-2 px-4 border-b">Status</th>
+                                    <th class="py-2 px-4 border-b">Catatan Atasan</th> {{-- <-- KOLOM BARU --}}
                                 </tr>
                             </thead>
                             <tbody>
@@ -43,12 +44,20 @@
                                             @endif
                                         </td>
                                         <td class="py-2 px-4 border-b">
-                                            {{-- Status Badge --}}
+                                            @if($leave->status == 'pending')
+                                                <span class="bg-yellow-200 text-yellow-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">Pending</span>
+                                            @elseif($leave->status == 'approved')
+                                                <span class="bg-green-200 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">Approved</span>
+                                            @else
+                                                <span class="bg-red-200 text-red-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">Rejected</span>
+                                            @endif
                                         </td>
+                                        {{-- KOLOM BARU UNTUK MENAMPILKAN CATATAN --}}
+                                        <td class="py-2 px-4 border-b text-left">{{ $leave->approver_notes ?? '-' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center py-4">Belum ada riwayat pengajuan.</td>
+                                        <td colspan="5" class="text-center py-4">Belum ada riwayat pengajuan.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -60,3 +69,4 @@
         </div>
     </div>
 </x-app-layout>
+                

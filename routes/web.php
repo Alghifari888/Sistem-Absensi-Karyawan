@@ -10,6 +10,8 @@ use App\Http\Controllers\Atasan\OvertimeController as AtasanOvertimeController;
 use App\Http\Controllers\Karyawan\LeaveController as KaryawanLeaveController;
 use App\Http\Controllers\Atasan\LeaveController as AtasanLeaveController;
 use App\Http\Controllers\Laporan\AbsensiController as LaporanAbsensiController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\PayrollController as AdminPayrollController; // <-- Pastikan baris ini ada
 
 // Halaman landing page utama
 Route::get('/', function () {
@@ -47,6 +49,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
         Route::get('/qrcode', [QrCodeController::class, 'show'])->name('qrcode.show');
+
+        Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+        Route::put('users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+
+        Route::get('payroll', [AdminPayrollController::class, 'index'])->name('payroll.index');
+        Route::get('payroll/{user}/payslip', [AdminPayrollController::class, 'generatePayslip'])->name('payroll.payslip');
     });
 
     // GROUPING ROUTE UNTUK ROLE ATASAN
@@ -84,9 +93,7 @@ Route::middleware('auth')->group(function () {
         Route::post('leaves', [KaryawanLeaveController::class, 'store'])->name('leaves.store');
     });
 
-    // ======================================================
-    //         ROUTE BARU UNTUK SEMUA LAPORAN
-    // ======================================================
+    // GROUPING ROUTE UNTUK LAPORAN
     Route::middleware(['role:admin,atasan'])->prefix('laporan')->name('laporan.')->group(function() {
         Route::get('absensi', [LaporanAbsensiController::class, 'index'])->name('absensi.index');
     });
@@ -95,3 +102,4 @@ Route::middleware('auth')->group(function () {
 
 // Memanggil route otentikasi bawaan Breeze
 require __DIR__.'/auth.php';
+      

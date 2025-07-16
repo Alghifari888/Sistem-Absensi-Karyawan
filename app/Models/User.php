@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'gaji_pokok',         
+        'tarif_lembur_per_jam',
     ];
 
     /**
