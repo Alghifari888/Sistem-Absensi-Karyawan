@@ -52,9 +52,10 @@
                         </x-nav-link>
                          <x-nav-link :href="route('admin.payroll.index')" :active="request()->routeIs('admin.payroll.*')">
                             {{ __('Penggajian') }}
-                        
-                        
                         </x-nav-link>
+                         <x-nav-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')">
+                             {{ __('Audit Log') }}
+                         </x-nav-link>
                     @endif
                 </div>
             </div>
@@ -148,6 +149,9 @@
                  <x-responsive-nav-link :href="route('admin.payroll.index')" :active="request()->routeIs('admin.payroll.*')">
                     {{ __('Penggajian') }}
                 </x-responsive-nav-link>
+                 <x-responsive-nav-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')">
+                    {{ __('Audit Log') }}
+              </x-responsive-nav-link>
             @endif
         </div>
 

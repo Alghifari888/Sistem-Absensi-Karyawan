@@ -11,7 +11,8 @@ use App\Http\Controllers\Karyawan\LeaveController as KaryawanLeaveController;
 use App\Http\Controllers\Atasan\LeaveController as AtasanLeaveController;
 use App\Http\Controllers\Laporan\AbsensiController as LaporanAbsensiController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\PayrollController as AdminPayrollController; // <-- Pastikan baris ini ada
+use App\Http\Controllers\Admin\PayrollController as AdminPayrollController;
+use App\Http\Controllers\Admin\AuditLogController; 
 
 // Halaman landing page utama
 Route::get('/', function () {
@@ -56,6 +57,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('payroll', [AdminPayrollController::class, 'index'])->name('payroll.index');
         Route::get('payroll/{user}/payslip', [AdminPayrollController::class, 'generatePayslip'])->name('payroll.payslip');
+         // ROUTE BARU UNTUK AUDIT LOG
+    Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     });
 
     // GROUPING ROUTE UNTUK ROLE ATASAN
