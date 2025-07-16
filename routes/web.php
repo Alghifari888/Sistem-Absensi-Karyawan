@@ -6,6 +6,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Karyawan\OvertimeController as KaryawanOvertimeController;
+use App\Http\Controllers\Atasan\OvertimeController as AtasanOvertimeController; // <-- TAMBAHKAN BARIS INI
 
 // Halaman landing page utama
 Route::get('/', function () {
@@ -47,13 +48,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/qrcode', [QrCodeController::class, 'show'])->name('qrcode.show');
     });
 
-    // GROUPING ROUTE UNTUK ROLE ATASAN
-    Route::middleware('role:atasan')->prefix('atasan')->name('atasan.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('atasan.dashboard');
-        })->name('dashboard');
-        // Nanti route-route atasan lainnya ditaruh di sini
-    });
+   // GROUPING ROUTE UNTUK ROLE ATASAN
+Route::middleware('role:atasan')->prefix('atasan')->name('atasan.')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('atasan.dashboard');
+    })->name('dashboard');
+    
+    // ROUTE UNTUK LEMBUR ATASAN
+    Route::get('overtime', [AtasanOvertimeController::class, 'index'])->name('overtime.index');
+    Route::get('overtime/{overtime}/edit', [AtasanOvertimeController::class, 'edit'])->name('overtime.edit');
+    Route::put('overtime/{overtime}', [AtasanOvertimeController::class, 'update'])->name('overtime.update');
+});
 
     // GROUPING ROUTE UNTUK ROLE KARYAWAN
     Route::middleware('role:karyawan')->prefix('karyawan')->name('karyawan.')->group(function () {

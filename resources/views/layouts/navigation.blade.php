@@ -16,13 +16,12 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    {{-- Menu Lembur (hanya untuk Karyawan & Atasan) --}}
-                    @if(auth()->user()->isKaryawan() || auth()->user()->isAtasan())
-                        <x-nav-link :href="auth()->user()->isKaryawan() ? route('karyawan.overtime.index') : '#' " :active="request()->routeIs('karyawan.overtime.*') || request()->routeIs('atasan.overtime.*')">
-                            {{ __('Lembur') }}
-                        </x-nav-link>
-                    @endif
-
+                  {{-- Menu Lembur (hanya untuk Karyawan & Atasan) --}}
+@if(auth()->user()->isKaryawan() || auth()->user()->isAtasan())
+    <x-nav-link :href="auth()->user()->isKaryawan() ? route('karyawan.overtime.index') : route('atasan.overtime.index')" :active="request()->routeIs('karyawan.overtime.*') || request()->routeIs('atasan.overtime.*')">
+        {{ __('Lembur') }}
+    </x-nav-link>
+@endif
                     {{-- Menu Admin --}}
                     @if(auth()->user()->isAdmin())
                         <x-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.index')">
