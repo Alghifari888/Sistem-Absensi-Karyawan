@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\Overtime;
 use App\Policies\OvertimePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use App\Models\Leave;
+use App\Policies\LeavePolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         // Daftarkan Policy Overtime di sini
         Overtime::class => OvertimePolicy::class,
+        Leave::class => LeavePolicy::class,
     ];
 
     /**

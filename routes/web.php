@@ -6,16 +6,16 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Admin\QrCodeController;
 use App\Http\Controllers\Karyawan\OvertimeController as KaryawanOvertimeController;
-use App\Http\Controllers\Atasan\OvertimeController as AtasanOvertimeController; // <-- TAMBAHKAN BARIS INI
+use App\Http\Controllers\Atasan\OvertimeController as AtasanOvertimeController;
+use App\Http\Controllers\Karyawan\LeaveController as KaryawanLeaveController; // <-- Tambahkan ini
 
 // Halaman landing page utama
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Route fallback dashboard bawaan Breeze, bisa kita hapus nanti
+// Route fallback dashboard bawaan Breeze
 Route::get('/dashboard', function () {
-    // Logika redirect cerdas berdasarkan role
     if (auth()->user()->isAdmin()) {
         return redirect()->route('admin.dashboard');
     }
@@ -25,7 +25,6 @@ Route::get('/dashboard', function () {
     if (auth()->user()->isKaryawan()) {
         return redirect()->route('karyawan.dashboard');
     }
-    // Fallback jika tidak ada role
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -48,36 +47,39 @@ Route::middleware('auth')->group(function () {
         Route::get('/qrcode', [QrCodeController::class, 'show'])->name('qrcode.show');
     });
 
-   // GROUPING ROUTE UNTUK ROLE ATASAN
-Route::middleware('role:atasan')->prefix('atasan')->name('atasan.')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('atasan.dashboard');
-    })->name('dashboard');
-    
-    // ROUTE UNTUK LEMBUR ATASAN
-    Route::get('overtime', [AtasanOvertimeController::class, 'index'])->name('overtime.index');
-    Route::get('overtime/{overtime}/edit', [AtasanOvertimeController::class, 'edit'])->name('overtime.edit');
-    Route::put('overtime/{overtime}', [AtasanOvertimeController::class, 'update'])->name('overtime.update');
-});
+    // GROUPING ROUTE UNTUK ROLE ATASAN
+    Route::middleware('role:atasan')->prefix('atasan')->name('atasan.')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('atasan.dashboard');
+        })->name('dashboard');
+        
+        Route::get('overtime', [AtasanOvertimeController::class, 'index'])->name('overtime.index');
+        Route::get('overtime/{overtime}/edit', [AtasanOvertimeController::class, 'edit'])->name('overtime.edit');
+        Route::put('overtime/{overtime}', [AtasanOvertimeController::class, 'update'])->name('overtime.update');
+    });
 
     // GROUPING ROUTE UNTUK ROLE KARYAWAN
     Route::middleware('role:karyawan')->prefix('karyawan')->name('karyawan.')->group(function () {
         Route::get('/dashboard', function () {
-            // Ambil data absensi hari ini untuk ditampilkan di dashboard
             $todayAttendance = \App\Models\Attendance::where('user_id', auth()->id())
                 ->where('attendance_date', now()->toDateString())
                 ->first();
-                
             return view('karyawan.dashboard', compact('todayAttendance'));
         })->name('dashboard');
         
-        // ROUTE UNTUK PROSES ABSENSI
         Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
         
         // ROUTE UNTUK LEMBUR KARYAWAN
         Route::get('overtime', [KaryawanOvertimeController::class, 'index'])->name('overtime.index');
         Route::get('overtime/create', [KaryawanOvertimeController::class, 'create'])->name('overtime.create');
         Route::post('overtime', [KaryawanOvertimeController::class, 'store'])->name('overtime.store');
+
+        // ======================================================
+        //      ROUTE BARU UNTUK CUTI & IZIN KARYAWAN
+        // ======================================================
+        Route::get('leaves', [KaryawanLeaveController::class, 'index'])->name('leaves.index');
+        Route::get('leaves/create', [KaryawanLeaveController::class, 'create'])->name('leaves.create');
+        Route::post('leaves', [KaryawanLeaveController::class, 'store'])->name('leaves.store');
     });
 });
 

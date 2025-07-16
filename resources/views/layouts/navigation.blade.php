@@ -16,12 +16,16 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                  {{-- Menu Lembur (hanya untuk Karyawan & Atasan) --}}
-@if(auth()->user()->isKaryawan() || auth()->user()->isAtasan())
-    <x-nav-link :href="auth()->user()->isKaryawan() ? route('karyawan.overtime.index') : route('atasan.overtime.index')" :active="request()->routeIs('karyawan.overtime.*') || request()->routeIs('atasan.overtime.*')">
-        {{ __('Lembur') }}
-    </x-nav-link>
-@endif
+                    {{-- Menu Karyawan & Atasan --}}
+                    @if(auth()->user()->isKaryawan() || auth()->user()->isAtasan())
+                        <x-nav-link :href="auth()->user()->isKaryawan() ? route('karyawan.overtime.index') : route('atasan.overtime.index')" :active="request()->routeIs('karyawan.overtime.*') || request()->routeIs('atasan.overtime.*')">
+                            {{ __('Lembur') }}
+                        </x-nav-link>
+                        <x-nav-link :href="auth()->user()->isKaryawan() ? route('karyawan.leaves.index') : '#'" :active="request()->routeIs('karyawan.leaves.*') || request()->routeIs('atasan.leaves.*')">
+                            {{ __('Cuti & Izin') }}
+                        </x-nav-link>
+                    @endif
+
                     {{-- Menu Admin --}}
                     @if(auth()->user()->isAdmin())
                         <x-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.index')">
@@ -87,14 +91,17 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             
-            {{-- Menu Lembur (hanya untuk Karyawan & Atasan) --}}
+            {{-- Menu Karyawan & Atasan (Mobile) --}}
             @if(auth()->user()->isKaryawan() || auth()->user()->isAtasan())
-                <x-responsive-nav-link :href="auth()->user()->isKaryawan() ? route('karyawan.overtime.index') : '#'" :active="request()->routeIs('karyawan.overtime.*') || request()->routeIs('atasan.overtime.*')">
+                <x-responsive-nav-link :href="auth()->user()->isKaryawan() ? route('karyawan.overtime.index') : route('atasan.overtime.index')" :active="request()->routeIs('karyawan.overtime.*') || request()->routeIs('atasan.overtime.*')">
                     {{ __('Lembur') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="auth()->user()->isKaryawan() ? route('karyawan.leaves.index') : '#'" :active="request()->routeIs('karyawan.leaves.*') || request()->routeIs('atasan.leaves.*')">
+                    {{ __('Cuti & Izin') }}
                 </x-responsive-nav-link>
             @endif
 
-            {{-- Menu Admin --}}
+            {{-- Menu Admin (Mobile) --}}
             @if(auth()->user()->isAdmin())
                 <x-responsive-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.index')">
                     {{ __('Pengaturan') }}

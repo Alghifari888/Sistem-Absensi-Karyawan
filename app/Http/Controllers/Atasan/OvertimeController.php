@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Overtime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // <-- TAMBAHKAN INI
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // Pastikan baris ini ada
 
 class OvertimeController extends Controller
 {
-    use AuthorizesRequests; // <-- DAN TAMBAHKAN INI
+    use AuthorizesRequests; // Dan pastikan baris ini juga ada
 
     /**
      * Menampilkan daftar semua pengajuan lembur.
@@ -21,7 +21,7 @@ class OvertimeController extends Controller
         $this->authorize('viewAny', Overtime::class);
 
         // Ambil semua data lembur, urutkan dari yang terbaru
-        $overtimes = Overtime::with('user')->orderBy('overtime_date', 'desc')->paginate(10);
+        $overtimes = Overtime::with('user')->orderBy('created_at', 'desc')->paginate(10);
 
         return view('atasan.overtime.index', compact('overtimes'));
     }
