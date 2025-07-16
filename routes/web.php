@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Admin\QrCodeController;
+use App\Http\Controllers\Karyawan\OvertimeController as KaryawanOvertimeController;
 
 // Halaman landing page utama
 Route::get('/', function () {
@@ -13,6 +14,17 @@ Route::get('/', function () {
 
 // Route fallback dashboard bawaan Breeze, bisa kita hapus nanti
 Route::get('/dashboard', function () {
+    // Logika redirect cerdas berdasarkan role
+    if (auth()->user()->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
+    if (auth()->user()->isAtasan()) {
+        return redirect()->route('atasan.dashboard');
+    }
+    if (auth()->user()->isKaryawan()) {
+        return redirect()->route('karyawan.dashboard');
+    }
+    // Fallback jika tidak ada role
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -30,10 +42,9 @@ Route::middleware('auth')->group(function () {
             return view('admin.dashboard');
         })->name('dashboard');
         
-        // ROUTE UNTUK PENGATURAN (SUDAH DIPERBAIKI)
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
-         Route::get('/qrcode', [QrCodeController::class, 'show'])->name('qrcode.show'); // <-- ROUTE BARU
+        Route::get('/qrcode', [QrCodeController::class, 'show'])->name('qrcode.show');
     });
 
     // GROUPING ROUTE UNTUK ROLE ATASAN
@@ -55,8 +66,13 @@ Route::middleware('auth')->group(function () {
             return view('karyawan.dashboard', compact('todayAttendance'));
         })->name('dashboard');
         
-        // ROUTE BARU UNTUK PROSES ABSENSI
+        // ROUTE UNTUK PROSES ABSENSI
         Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+        
+        // ROUTE UNTUK LEMBUR KARYAWAN
+        Route::get('overtime', [KaryawanOvertimeController::class, 'index'])->name('overtime.index');
+        Route::get('overtime/create', [KaryawanOvertimeController::class, 'create'])->name('overtime.create');
+        Route::post('overtime', [KaryawanOvertimeController::class, 'store'])->name('overtime.store');
     });
 });
 
