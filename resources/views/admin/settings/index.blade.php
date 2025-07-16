@@ -7,6 +7,25 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            {{-- ====================================================== --}}
+            {{--         PANEL INFORMASI PANDUAN PENGATURAN BARU        --}}
+            {{-- ====================================================== --}}
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
+                <div class="flex">
+                    <div class="py-1"><x-heroicon-s-information-circle class="h-6 w-6 text-blue-500 mr-4"/></div>
+                    <div>
+                        <p class="font-bold">Panduan Halaman Pengaturan Sistem</p>
+                        <ul class="list-disc list-inside text-sm mt-2">
+                            <li>Semua perubahan di halaman ini akan langsung mempengaruhi seluruh alur kerja sistem.</li>
+                            <li>**Jam Masuk & Pulang:** Menentukan jam kerja standar dan validasi keterlambatan.</li>
+                            <li>**Latitude & Longitude Kantor:** Titik pusat lokasi kantor untuk validasi absensi via GPS. Anda bisa mendapatkan koordinat ini dari Google Maps.</li>
+                            <li>**Radius Toleransi:** Jarak maksimal (dalam meter) dari titik kantor di mana karyawan masih diizinkan untuk melakukan absensi.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     

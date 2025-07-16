@@ -7,6 +7,24 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            
+            {{-- PANEL INFORMASI PANDUAN BARU --}}
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
+                <div class="flex">
+                    <div class="py-1"><x-heroicon-s-information-circle class="h-6 w-6 text-blue-500 mr-4"/></div>
+                    <div>
+                        <p class="font-bold">Panduan Membaca Laporan Absensi</p>
+                        <ul class="list-disc list-inside text-sm mt-2">
+                            <li>Gunakan filter di atas untuk melihat laporan pada bulan dan tahun yang diinginkan.</li>
+                            <li>Kolom **H** (Hijau) adalah total hari kehadiran karyawan pada periode tersebut.</li>
+                            <li>Kolom **A** (Merah) adalah total hari karyawan tidak melakukan absensi (Alpha).</li>
+                            <li>Sel absensi yang berwarna **merah muda** menandakan karyawan tersebut terlambat masuk.</li>
+                            <li>Sel **L** (abu-abu) menandakan hari libur akhir pekan (Sabtu & Minggu).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
@@ -61,7 +79,7 @@
                                             @endphp
                                             <td class="px-2 py-4 whitespace-nowrap text-center text-sm 
                                                 @if($isWeekend) bg-gray-200 @endif
-                                                @if($attendance && \Carbon\Carbon::parse($attendance->check_in_time)->gt(\Carbon\Carbon::parse($jamMasukSetting))) bg-red-200 @endif">
+                                                @if($attendance && \Carbon\Carbon::parse($attendance->check_in_time)->gt(\Carbon\Carbon::parse($jamMasukSetting))) bg-red-100 text-red-800 @endif">
                                                 
                                                 @if ($attendance)
                                                     {{ \Carbon\Carbon::parse($attendance->check_in_time)->format('H:i') }}

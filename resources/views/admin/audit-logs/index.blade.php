@@ -7,9 +7,28 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
+            {{-- ====================================================== --}}
+            {{--           PANEL INFORMASI PANDUAN AUDIT LOG          --}}
+            {{-- ====================================================== --}}
+            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
+                <div class="flex">
+                    <div class="py-1"><x-heroicon-s-information-circle class="h-6 w-6 text-blue-500 mr-4"/></div>
+                    <div>
+                        <p class="font-bold">Panduan Halaman Audit Log</p>
+                        <ul class="list-disc list-inside text-sm mt-2">
+                            <li>Halaman ini adalah catatan "CCTV" digital untuk semua aktivitas penting di dalam sistem.</li>
+                            <li>**User Pelaku:** Siapa yang melakukan perubahan (misal: Admin atau Atasan).</li>
+                            <li>**Aktivitas:** Tindakan yang dilakukan (misal: memproses cuti, memperbarui gaji).</li>
+                            <li>**Detail Perubahan:** Menampilkan data sebelum (`Data Lama`) dan sesudah (`Data Baru`) perubahan untuk pelacakan yang akurat.</li>
+                            <li>Log ini dibuat secara otomatis oleh sistem dan tidak dapat diubah demi menjaga integritas data.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <p class="mb-4 text-gray-600">Halaman ini mencatat semua aktivitas penting yang terjadi di dalam sistem.</p>
                     
                     <div class="overflow-x-auto">
                         <table class="min-w-full bg-white">
