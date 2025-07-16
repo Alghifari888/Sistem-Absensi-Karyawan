@@ -1,4 +1,4 @@
-```markdown
+
 # 💼 Sistem Absensi & Penggajian Karyawan (Laravel 12)
 
 Sebuah aplikasi web Human Resource Information System (HRIS) modern yang dibangun dari nol menggunakan Laravel 12. Proyek ini dirancang sebagai studi kasus nyata untuk mempelajari arsitektur Laravel secara profesional.
