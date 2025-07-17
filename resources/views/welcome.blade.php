@@ -105,7 +105,7 @@
                 <p>Dibuat dengan <span class="text-pink-500">❤️</span> oleh 
                     <a href="https://github.com/Alghifari888" target="_blank" class="text-indigo-600 font-semibold hover:underline">Alghifari888</a>
                 </p>
-                <p class="mt-1">Powered by Laravel 12, Tailwind, VanillaTilt, & AI</p>
+                <p class="mt-1">Powered by Laravel 12, Tailwind.</p>
             </footer>
         </div>
     </div>
