@@ -27,8 +27,26 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            // Validasi email: wajib format email valid DAN berakhiran @gmail.com
+            'email' => ['required', 'string', 'email', 'ends_with:@gmail.com'],
+            
+            // Validasi password: wajib minimal 1 huruf besar (?=.*[A-Z]), 1 angka (?=.*\d), dan 1 simbol (?=.*[\W_])
+            'password' => [
+                'required', 
+                'string', 
+                'regex:/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/'
+            ],
+        ];
+    }
+
+    /**
+     * Kustomisasi pesan error agar user mengetahui alasan spesifik penolakan login.
+     */
+    public function messages(): array
+    {
+        return [
+            'email.ends_with' => 'Akses ditolak. Email wajib menggunakan domain @gmail.com.',
+            'password.regex' => 'Format password salah. Wajib mengandung minimal 1 huruf besar, 1 angka, dan 1 simbol (contoh: Admin123*).',
         ];
     }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -22,25 +23,71 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request): Response
     {
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        // LOGIKA PENGALIHAN BERDASARKAN ROLE PENGGUNA
+        // LOGIKA PENENTUAN URL BERDASARKAN ROLE PENGGUNA
         $user = $request->user();
+        $defaultUrl = route('dashboard');
 
         if ($user->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard'));
+            $defaultUrl = route('admin.dashboard');
         } elseif ($user->isAtasan()) {
-            return redirect()->intended(route('atasan.dashboard'));
+            $defaultUrl = route('atasan.dashboard');
         } elseif ($user->isKaryawan()) {
-            return redirect()->intended(route('karyawan.dashboard'));
+            $defaultUrl = route('karyawan.dashboard');
         }
 
-        // Pengalihan default jika tidak ada role yang cocok
-        return redirect()->intended(route('dashboard'));
+        // Ambil intended URL (jika user sebelumnya mencoba akses halaman tertentu) atau gunakan default
+        $targetUrl = redirect()->intended($defaultUrl)->getTargetUrl();
+
+        // Render HTML langsung dengan Pop-up Animasi SweetAlert2
+        $html = <<<HTML
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Autentikasi Berhasil</title>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <style>
+                body { 
+                    background-color: #f3f4f6; 
+                    margin: 0; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    height: 100vh; 
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                }
+            </style>
+        </head>
+        <body>
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login Berhasil!',
+                    text: 'Mengarahkan ke dashboard...',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                }).then(() => {
+                    window.location.href = "{$targetUrl}";
+                });
+            </script>
+        </body>
+        </html>
+        HTML;
+
+        return response($html);
     }
 
     /**
