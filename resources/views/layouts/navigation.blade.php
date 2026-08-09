@@ -79,14 +79,11 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form id="logout-form" method="POST" action="{{ route('logout') }}" onsubmit="return logoutHandler(event)">
                             @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                            <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 block">
                                 {{ __('Log Out') }}
-                            </x-dropdown-link>
+                            </button>
                         </form>
                     </x-slot>
                 </x-dropdown>
@@ -166,16 +163,60 @@
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
-                <form method="POST" action="{{ route('logout') }}">
+                <form method="POST" action="{{ route('logout') }}" onsubmit="return logoutHandler(event)" style="width: 100%;">
                     @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                    <button type="submit" class="w-full text-left block px-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">
                         {{ __('Log Out') }}
-                    </x-responsive-nav-link>
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </nav>
+
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Logout Handler dengan SweetAlert2 -->
+<script>
+function logoutHandler(event) {
+    event.preventDefault();
+
+    console.log('🔴 logoutHandler CALLED!');
+
+    Swal.fire({
+        title: 'Yakin ingin Logout?',
+        text: 'Anda akan keluar dari akun ini',
+        icon: 'warning',
+        iconColor: '#ef4444',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Logout',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log('✅ User confirmed, showing loading animation...');
+
+            Swal.fire({
+                title: 'Logging Out...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                timer: 2000,
+                timerProgressBar: true
+            }).then(() => {
+                console.log('✅ 2 seconds passed, submitting form...');
+                document.getElementById('logout-form').submit();
+            });
+        } else {
+            console.log('❌ User cancelled logout');
+        }
+    });
+
+    return false;
+}
+</script>
+

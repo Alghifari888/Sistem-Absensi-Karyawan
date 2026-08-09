@@ -127,11 +127,11 @@
                                 <x-dropdown-link :href="route('profile.edit')">
                                     {{ __('Profile') }}
                                 </x-dropdown-link>
-                                <form method="POST" action="{{ route('logout') }}">
+                                <form id="logout-form" method="POST" action="{{ route('logout') }}" onsubmit="return logoutHandler(event)">
                                     @csrf
-                                    <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
+                                    <button type="submit" class="w-full text-left px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out">
                                         {{ __('Log Out') }}
-                                    </x-dropdown-link>
+                                    </button>
                                 </form>
                             </x-slot>
                         </x-dropdown>
@@ -144,5 +144,44 @@
             </div>
         </div>
         @stack('scripts')
+
+        <!-- SweetAlert2 CDN -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <!-- Logout Handler dengan SweetAlert2 -->
+        <script>
+        function logoutHandler(event) {
+            event.preventDefault();
+
+            Swal.fire({
+                title: 'Yakin ingin Logout?',
+                text: 'Anda akan keluar dari akun ini',
+                icon: 'warning',
+                iconColor: '#ef4444',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Logout',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Logging Out...',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        timer: 2000,
+                        timerProgressBar: true
+                    }).then(() => {
+                        document.getElementById('logout-form').submit();
+                    });
+                }
+            });
+
+            return false;
+        }
+        </script>
     </body>
 </html>

@@ -51,8 +51,17 @@
         }
     </style>
 </head>
-<body class="antialiased text-gray-900 moving-gradient">
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
+<body class="antialiased text-gray-900 moving-gradient relative">
+    
+    <!-- Tombol Kembali (Floating Top Left) -->
+    <a href="/" class="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center px-4 py-2 bg-white/60 backdrop-blur-md border border-white/40 shadow-sm rounded-full text-sm font-semibold text-gray-700 hover:bg-white/80 hover:shadow-md transition-all duration-300 z-50">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Kembali
+    </a>
+
+    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-16 sm:pt-0">
         <div class="w-full sm:max-w-4xl mt-6 rounded-2xl overflow-hidden sm:grid sm:grid-cols-2"
              data-tilt data-tilt-max="10" data-tilt-speed="600" data-tilt-glare="true" data-tilt-max-glare="0.2">
 
