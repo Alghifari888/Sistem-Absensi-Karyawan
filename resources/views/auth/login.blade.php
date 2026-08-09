@@ -62,7 +62,7 @@
                     <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-24 h-24 rounded-full object-cover mb-6 border-4 border-gray-700">
                 </a>
                 <h2 class="text-3xl font-bold mb-2">{{ config('app.name', 'Laravel') }}</h2>
-                <p class="text-sm text-gray-300 text-center">Selamat datang kembali 👋<br>Silakan masuk untuk melanjutkan.</p>
+                <p class="text-sm text-gray-300 text-center">Selamat datang kembali <br>Silakan masuk untuk melanjutkan.</p>
             </div>
 
             <!-- Kolom Kanan: Form -->

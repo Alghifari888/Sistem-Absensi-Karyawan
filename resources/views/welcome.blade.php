@@ -66,14 +66,14 @@
             {{-- Header --}}
             <header class="text-center mb-20">
                 <h1 class="text-5xl md:text-7xl font-extrabold neon-glow tracking-tight mb-4">Sistem Absensi & HRIS</h1>
-                <p class="text-xl font-medium text-gray-600">Solusi Profesional berbasis Laravel 12 + Tailwind CSS</p>
+                <p class="text-xl font-medium text-gray-600">Solusi Profesional berbasis Laravel 13 + Tailwind CSS</p>
             </header>
 
             {{-- Tentang --}}
             <section class="glass-deep rounded-3xl p-10 text-center max-w-5xl mx-auto mb-20">
-                <h2 class="text-3xl font-bold text-indigo-700 mb-4">🧠 Tentang Project</h2>
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">Tentang Project</h2>
                 <p class="text-gray-700 leading-relaxed text-base">
-                    Bukan sekadar aplikasi, ini adalah <strong class="text-indigo-800">Project Sistem Absensi</strong> — dibangun dari nol dengan Laravel 12, Tailwind, dan dilengkapi fitur-fitur kritikal seperti Autentikasi, Absensi GPS + QR, Slip Gaji PDF, dan Dashboard Karyawan.
+                    Bukan sekadar aplikasi, ini adalah <strong class="text-indigo-800">Project Sistem Absensi</strong> — dibangun dari nol dengan Laravel 13, Tailwind, dan dilengkapi fitur-fitur kritikal seperti Autentikasi, Absensi GPS + QR, Slip Gaji PDF, dan Dashboard Karyawan.
                 </p>
             </section>
 
@@ -105,7 +105,7 @@
                 <p>Dibuat dengan <span class="text-pink-500">❤️</span> oleh 
                     <a href="https://github.com/Alghifari888" target="_blank" class="text-indigo-600 font-semibold hover:underline">Alghifari888</a>
                 </p>
-                <p class="mt-1">Powered by Laravel 12, Tailwind.</p>
+                <p class="mt-1">Powered by Laravel 13, Tailwind.</p>
             </footer>
         </div>
     </div>
