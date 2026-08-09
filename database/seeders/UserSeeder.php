@@ -17,24 +17,24 @@ class UserSeeder extends Seeder
         // Membuat User Admin
         User::create([
             'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password'),
+            'email' => 'admin@gmail.com',
+            'password' => Hash::make('Admin1234!'),
             'role' => 'admin',
         ]);
 
         // Membuat User Atasan
         User::create([
             'name' => 'Atasan User',
-            'email' => 'atasan@example.com',
-            'password' => Hash::make('password'),
+            'email' => 'atasan@gmail.com',
+            'password' => Hash::make('Atasan1234!'),
             'role' => 'atasan',
         ]);
 
         // Membuat User Karyawan
         User::create([
             'name' => 'Karyawan User',
-            'email' => 'karyawan@example.com',
-            'password' => Hash::make('password'),
+            'email' => 'karyawan@gmail.com',
+            'password' => Hash::make('Karyawan1234!'),
             'role' => 'karyawan',
         ]);
     }

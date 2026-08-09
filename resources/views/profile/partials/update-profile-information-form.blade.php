@@ -13,7 +13,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form id="profile-form" method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
         @csrf
         @method('patch')
 
@@ -49,16 +49,57 @@
 
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
-
-            @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ __('Saved.') }}</p>
-            @endif
         </div>
     </form>
+
+    <script>
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const form = this;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const formData = {
+                _method: 'PATCH',
+                name: form.elements.name.value,
+                email: form.elements.email.value,
+                _token: csrfToken,
+            };
+
+            fetch(form.action, {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Update failed');
+                return response.json();
+            })
+            .then(data => {
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: "Account's profile berhasil di ubah",
+                    icon: 'success',
+                    confirmButtonColor: '#4F46E5',
+                    confirmButtonText: 'OK',
+                    allowOutsideClick: false,
+                }).then(() => {
+                    location.reload();
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Gagal update profil. Silakan coba lagi.',
+                    icon: 'error',
+                    confirmButtonColor: '#EF4444'
+                });
+            });
+        });
+    </script>
 </section>
