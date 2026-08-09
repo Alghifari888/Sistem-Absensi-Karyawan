@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-2xl text-gray-800 dark:text-white leading-tight tracking-wide">
-            {{ __('📊 Dashboard Admin') }}
+            {{ __('Dashboard Admin') }}
         </h2>
     </x-slot>
 
@@ -34,7 +34,7 @@
 
             {{-- Panel Aktivitas Terbaru --}}
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 pb-2">📅 Aktivitas Terbaru</h3>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 pb-2">Aktivitas Terbaru</h3>
                 <div class="space-y-4">
                     @forelse ($recentLogs as $log)
                         <div class="flex items-start space-x-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">

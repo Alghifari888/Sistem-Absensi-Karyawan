@@ -13,7 +13,7 @@
 
             {{-- Update Profile --}}
             <div class="p-6 bg-white dark:bg-gray-900 shadow-lg rounded-2xl">
-                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-100 mb-4">🔧 Perbarui Informasi Profil</h3>
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-100 mb-4">Perbarui Informasi Profil</h3>
                 <div class="max-w-2xl">
                     @include('profile.partials.update-profile-information-form')
                 </div>
@@ -21,7 +21,7 @@
 
             {{-- Update Password --}}
             <div class="p-6 bg-white dark:bg-gray-900 shadow-lg rounded-2xl">
-                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-100 mb-4">🔒 Ubah Password</h3>
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-100 mb-4">Ubah Password</h3>
                 <div class="max-w-2xl">
                     @include('profile.partials.update-password-form')
                 </div>
@@ -29,7 +29,7 @@
 
             {{-- Delete Account --}}
             <div class="p-6 bg-white dark:bg-gray-900 shadow-lg rounded-2xl">
-                <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">⚠️ Hapus Akun</h3>
+                <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Hapus Akun</h3>
                 <div class="max-w-2xl">
                     @include('profile.partials.delete-user-form')
                 </div>

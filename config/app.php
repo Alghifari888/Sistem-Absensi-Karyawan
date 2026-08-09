@@ -101,7 +101,8 @@ return [
         /*
          * Application Service Providers...
          */
-        App\Providers\AppServiceProvider::class,
+        // AppServiceProvider sudah didaftarkan otomatis lewat bootstrap/providers.php (konvensi Laravel 11+).
+        // Didaftarkan ulang di sini akan membuat boot() (observer, event listener) berjalan dua kali.
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         // App\Providers\EventServiceProvider::class, // Diberi komentar karena filenya tidak ada

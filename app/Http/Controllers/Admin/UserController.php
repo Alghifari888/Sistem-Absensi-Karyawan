@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 
 class UserController extends Controller
@@ -34,21 +33,34 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'email' => [
+                'required', 'string', 'email', 'max:255',
+                'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/',
+                'unique:'.User::class,
+            ],
+            'password' => [
+                'required', 'confirmed',
+                Rules\Password::min(8)->mixedCase()->numbers()->symbols(),
+            ],
             'role' => ['required', 'in:karyawan,atasan'],
+        ], [
+            'email.regex' => 'Email wajib menggunakan domain @gmail.com.',
+            'password.min' => 'Password minimal harus 8 karakter.',
+            'password.mixed' => 'Password wajib mengandung huruf besar, huruf kecil, angka, dan simbol.',
+            'password.numbers' => 'Password wajib mengandung minimal 1 angka.',
+            'password.symbols' => 'Password wajib mengandung minimal 1 simbol.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password, // otomatis di-hash oleh cast 'hashed' di Model User
             'role' => $request->role,
         ]);
 
         return redirect()->route('admin.users.index')->with('status', 'User baru berhasil ditambahkan.');
     }
-
 
     /**
      * Menampilkan form untuk edit user.
@@ -63,15 +75,35 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'email' => [
+                'required', 'email', 'max:255',
+                'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/',
+                'unique:users,email,' . $user->id,
+            ],
+            'password' => [
+                'nullable', 'confirmed',
+                Rules\Password::min(8)->mixedCase()->numbers()->symbols(),
+            ],
             'role' => 'required|in:karyawan,atasan',
             'gaji_pokok' => 'required|numeric|min:0',
             'tarif_lembur_per_jam' => 'required|numeric|min:0',
+        ], [
+            'email.regex' => 'Email wajib menggunakan domain @gmail.com.',
+            'password.min' => 'Password minimal harus 8 karakter.',
+            'password.mixed' => 'Password wajib mengandung huruf besar dan huruf kecil.',
+            'password.numbers' => 'Password wajib mengandung minimal 1 angka.',
+            'password.symbols' => 'Password wajib mengandung minimal 1 simbol.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
-        $user->update($request->all());
+        // Jika field password dikosongkan, jangan ikut di-update
+        if (empty($validated['password'])) {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
 
         return redirect()->route('admin.users.index')->with('status', 'Data user berhasil diperbarui.');
     }

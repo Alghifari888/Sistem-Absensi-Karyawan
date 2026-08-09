@@ -3,23 +3,18 @@
 namespace App\Observers;
 
 use App\Models\Overtime;
-use App\Models\AuditLog;
-use Illuminate\Support\Facades\Auth;
+use App\Observers\Concerns\RecordsAuditLog;
 
 class OvertimeObserver
 {
+    use RecordsAuditLog;
+
     /**
      * Handle the Overtime "created" event.
      */
     public function created(Overtime $overtime): void
     {
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'activity' => 'mengajukan_lembur',
-            'auditable_type' => Overtime::class,
-            'auditable_id' => $overtime->id,
-            'new_values' => json_encode($overtime->toArray()),
-        ]);
+        $this->recordAudit($overtime, 'mengajukan_lembur', null, $overtime->getAttributes());
     }
 
     /**
@@ -27,13 +22,29 @@ class OvertimeObserver
      */
     public function updated(Overtime $overtime): void
     {
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'activity' => 'memproses_lembur',
-            'auditable_type' => Overtime::class,
-            'auditable_id' => $overtime->id,
-            'old_values' => json_encode($overtime->getOriginal()),
-            'new_values' => json_encode($overtime->getChanges()),
-        ]);
+        $changes = $overtime->getChanges();
+        unset($changes['updated_at']);
+
+        if (empty($changes)) {
+            return;
+        }
+
+        $activity = match ($changes['status'] ?? null) {
+            'approved' => 'menyetujui_lembur',
+            'rejected' => 'menolak_lembur',
+            default => 'memperbarui_lembur',
+        };
+
+        $original = array_intersect_key($overtime->getOriginal(), $changes);
+
+        $this->recordAudit($overtime, $activity, $original, $changes);
+    }
+
+    /**
+     * Handle the Overtime "deleted" event.
+     */
+    public function deleted(Overtime $overtime): void
+    {
+        $this->recordAudit($overtime, 'menghapus_lembur', $overtime->getAttributes(), null);
     }
 }

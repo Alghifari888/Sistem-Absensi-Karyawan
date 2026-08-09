@@ -182,7 +182,7 @@
 function logoutHandler(event) {
     event.preventDefault();
 
-    console.log('🔴 logoutHandler CALLED!');
+    console.log('logoutHandler CALLED!');
 
     Swal.fire({
         title: 'Yakin ingin Logout?',
@@ -196,7 +196,7 @@ function logoutHandler(event) {
         cancelButtonText: 'Batal'
     }).then((result) => {
         if (result.isConfirmed) {
-            console.log('✅ User confirmed, showing loading animation...');
+            console.log('User confirmed, showing loading animation...');
 
             Swal.fire({
                 title: 'Logging Out...',
@@ -208,11 +208,11 @@ function logoutHandler(event) {
                 timer: 2000,
                 timerProgressBar: true
             }).then(() => {
-                console.log('✅ 2 seconds passed, submitting form...');
+                console.log('2 seconds passed, submitting form...');
                 document.getElementById('logout-form').submit();
             });
         } else {
-            console.log('❌ User cancelled logout');
+            console.log('User cancelled logout');
         }
     });
 
