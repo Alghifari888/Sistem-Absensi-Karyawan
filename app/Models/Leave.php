@@ -5,16 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
 
 class Leave extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'type',
@@ -27,19 +23,21 @@ class Leave extends Model
         'approver_notes',
     ];
 
-    /**
-     * Mendefinisikan relasi ke user yang mengajukan.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Mendefinisikan relasi ke user (atasan) yang memproses.
-     */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Jumlah hari pengajuan (inklusif tanggal mulai & selesai).
+     */
+    public function getTotalDaysAttribute(): int
+    {
+        return Carbon::parse($this->start_date)->diffInDays(Carbon::parse($this->end_date)) + 1;
     }
 }

@@ -11,6 +11,10 @@
             <div class="p-6 text-gray-900">
                 <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">
                     Selamat datang, {{ Auth::user()->name }}!
+                <!--Point sisa kuota cuti-->
+                    <p class="text-sm text-gray-500 text-center mb-4">
+                     Sisa kuota cuti tahunan Anda: <strong>{{ Auth::user()->sisaKuotaCuti() }} hari</strong>
+                    </p>
                 </h3>
 
                 {{-- Tampilkan Notifikasi --}}

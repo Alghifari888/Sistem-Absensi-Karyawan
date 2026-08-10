@@ -9,6 +9,13 @@
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+
+                    {{-- Info Sisa Kuota Cuti --}}
+                    <div class="bg-blue-50 border border-blue-200 text-blue-800 text-sm rounded-md p-3 mb-4">
+                        Sisa kuota cuti tahunan Anda: <strong>{{ $sisaKuota }} hari</strong>.
+                        (Kuota hanya berlaku untuk jenis "Cuti" — Izin & Sakit tidak memotong kuota.)
+                    </div>
+
                     <form method="POST" action="{{ route('karyawan.leaves.store') }}" enctype="multipart/form-data">
                         @csrf
 

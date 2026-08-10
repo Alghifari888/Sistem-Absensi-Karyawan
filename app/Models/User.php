@@ -5,8 +5,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -22,8 +24,13 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'gaji_pokok',         
+        'gaji_pokok',
         'tarif_lembur_per_jam',
+        'leave_quota',
+        'is_active',
+        'deactivated_reason',
+        'deactivated_at',
+        'deactivated_by',
     ];
 
     /**
@@ -46,6 +53,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'deactivated_at' => 'datetime',
         ];
     }
 
@@ -70,5 +79,37 @@ class User extends Authenticatable
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Relasi ke semua pengajuan cuti/izin milik user ini.
+     */
+    public function leaves(): HasMany
+    {
+        return $this->hasMany(Leave::class);
+    }
+
+    /**
+     * Relasi ke admin yang menonaktifkan akun ini (kalau ada).
+     */
+    public function deactivatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deactivated_by');
+    }
+
+    /**
+     * Hitung sisa kuota cuti tahunan (tipe 'cuti' saja, tahun berjalan).
+     * Dihitung dinamis dari data yang sudah disetujui, bukan counter tersimpan.
+     */
+    public function sisaKuotaCuti(): int
+    {
+        $terpakai = $this->leaves()
+            ->where('type', 'cuti')
+            ->where('status', 'approved')
+            ->whereYear('start_date', Carbon::now()->year)
+            ->get()
+            ->sum(fn (Leave $leave) => $leave->total_days);
+
+        return max(0, $this->leave_quota - $terpakai);
     }
 }

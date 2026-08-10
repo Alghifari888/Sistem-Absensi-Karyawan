@@ -73,7 +73,7 @@
                         </x-sidebar-link>
                         <x-sidebar-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
                             <x-heroicon-s-users class="w-6 h-6 mr-3" />
-                            <span>Manajemen User</span>
+                            <span>Manajemen User & Gaji</span>
                         </x-sidebar-link>
                         <x-sidebar-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')">
                             <x-heroicon-s-shield-check class="w-6 h-6 mr-3" />

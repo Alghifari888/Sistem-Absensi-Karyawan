@@ -9,6 +9,15 @@
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+
+                    <!-- Tombol Kembali -->
+                    <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Kembali ke Manajemen User
+                    </a>
+
                     <form method="POST" action="{{ route('admin.users.update', $user) }}">
                         @csrf
                         @method('PUT')
@@ -64,6 +73,13 @@
                             <x-input-label for="tarif_lembur_per_jam" :value="__('Tarif Lembur per Jam')" />
                             <x-text-input id="tarif_lembur_per_jam" class="block mt-1 w-full" type="number" name="tarif_lembur_per_jam" :value="old('tarif_lembur_per_jam', $user->tarif_lembur_per_jam)" required />
                             <x-input-error :messages="$errors->get('tarif_lembur_per_jam')" class="mt-2" />
+                        </div>
+
+                        <!-- Jatah Cuti Tahunan -->
+                        <div class="mt-4">
+                            <x-input-label for="leave_quota" :value="__('Jatah Cuti Tahunan (hari)')" />
+                            <x-text-input id="leave_quota" class="block mt-1 w-full" type="number" name="leave_quota" :value="old('leave_quota', $user->leave_quota)" required />
+                            <x-input-error :messages="$errors->get('leave_quota')" class="mt-2" />
                         </div>
 
                         <div class="flex items-center justify-end mt-4">

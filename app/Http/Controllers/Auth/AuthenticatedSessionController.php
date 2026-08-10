@@ -12,25 +12,30 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
     public function create(): View
     {
         return view('auth.login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
-    public function store(LoginRequest $request): Response
+    public function store(LoginRequest $request): Response|RedirectResponse
     {
         $request->authenticate();
 
+        $user = $request->user();
+
+        // Blokir login jika akun sudah dinonaktifkan admin
+        if (! $user->is_active) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'Akun Anda telah dinonaktifkan. Silakan hubungi admin untuk informasi lebih lanjut.',
+            ])->onlyInput('email');
+        }
+
         $request->session()->regenerate();
 
-        // LOGIKA PENENTUAN URL BERDASARKAN ROLE PENGGUNA
-        $user = $request->user();
         $defaultUrl = route('dashboard');
 
         if ($user->isAdmin()) {
@@ -41,10 +46,8 @@ class AuthenticatedSessionController extends Controller
             $defaultUrl = route('karyawan.dashboard');
         }
 
-        // Ambil intended URL (jika user sebelumnya mencoba akses halaman tertentu) atau gunakan default
         $targetUrl = redirect()->intended($defaultUrl)->getTargetUrl();
 
-        // Render HTML langsung dengan Pop-up Animasi SweetAlert2
         $html = <<<HTML
         <!DOCTYPE html>
         <html lang="id">
@@ -54,15 +57,7 @@ class AuthenticatedSessionController extends Controller
             <title>Autentikasi Berhasil</title>
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <style>
-                body { 
-                    background-color: #f3f4f6; 
-                    margin: 0; 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center; 
-                    height: 100vh; 
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                }
+                body { background-color: #f3f4f6; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
             </style>
         </head>
         <body>
@@ -76,12 +71,8 @@ class AuthenticatedSessionController extends Controller
                     timerProgressBar: true,
                     allowOutsideClick: false,
                     allowEscapeKey: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                }).then(() => {
-                    window.location.href = "{$targetUrl}";
-                });
+                    didOpen: () => { Swal.showLoading(); }
+                }).then(() => { window.location.href = "{$targetUrl}"; });
             </script>
         </body>
         </html>
@@ -90,17 +81,11 @@ class AuthenticatedSessionController extends Controller
         return response($html);
     }
 
-    /**
-     * Destroy an authenticated session.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
         return redirect('/');
     }
 }

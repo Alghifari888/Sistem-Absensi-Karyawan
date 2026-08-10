@@ -7,6 +7,7 @@ use App\Models\Leave;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class LeaveController extends Controller
 {
@@ -27,7 +28,9 @@ class LeaveController extends Controller
      */
     public function create()
     {
-        return view('karyawan.leaves.create');
+        $sisaKuota = Auth::user()->sisaKuotaCuti();
+
+        return view('karyawan.leaves.create', compact('sisaKuota'));
     }
 
     /**
@@ -40,12 +43,25 @@ class LeaveController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'required|string|max:255',
-            'proof_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Opsional, maks 2MB
+            'proof_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
+
+        // Validasi kuota HANYA untuk tipe 'cuti' (cuti tahunan)
+        if ($request->type === 'cuti') {
+            $totalDays = Carbon::parse($request->start_date)
+                ->diffInDays(Carbon::parse($request->end_date)) + 1;
+
+            $sisaKuota = Auth::user()->sisaKuotaCuti();
+
+            if ($totalDays > $sisaKuota) {
+                return back()->withInput()->withErrors([
+                    'start_date' => "Pengajuan cuti ({$totalDays} hari) melebihi sisa kuota Anda ({$sisaKuota} hari). Silakan ajukan sebagai 'Izin' jika tidak menggunakan jatah cuti tahunan.",
+                ]);
+            }
+        }
 
         $filePath = null;
         if ($request->hasFile('proof_document')) {
-            // Simpan file ke storage/app/public/proofs
             $filePath = $request->file('proof_document')->store('proofs', 'public');
         }
 
