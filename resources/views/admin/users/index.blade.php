@@ -16,8 +16,9 @@
                         <ul class="list-disc list-inside text-sm mt-2">
                             <li>Halaman ini digunakan untuk mengelola data semua pengguna dengan role **Karyawan** dan **Atasan**.</li>
                             <li>Gunakan tombol **"Tambah User Baru"** untuk mendaftarkan akun baru ke dalam sistem.</li>
-                            <li>Klik **"Edit"** untuk mengubah detail, role, Gaji Pokok, Tarif Lembur, dan Jatah Cuti.</li>
+                            <li>Klik **"Edit"** untuk mengubah detail, role, status kepegawaian, Gaji Pokok, Tarif Lembur, dan Jatah Cuti.</li>
                             <li>Klik **"Nonaktifkan"** untuk menonaktifkan akun (bukan menghapus) — data histori tetap aman.</li>
+                            <li>Klik **"Cek Kontrak Berakhir"** untuk memeriksa & menonaktifkan otomatis karyawan kontrak yang masa kontraknya sudah lewat.</li>
                         </ul>
                     </div>
                 </div>
@@ -26,7 +27,14 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <div class="flex justify-end mb-4">
+                    <div class="flex justify-end mb-4 gap-3">
+                        <form method="POST" action="{{ route('admin.users.check-expired-contracts') }}"
+                              onsubmit="return confirm('Jalankan pengecekan kontrak yang sudah berakhir sekarang?')">
+                            @csrf
+                            <x-secondary-button type="submit">
+                                {{ __('Cek Kontrak Berakhir') }}
+                            </x-secondary-button>
+                        </form>
                         <a href="{{ route('admin.users.create') }}">
                             <x-primary-button>
                                 {{ __('Tambah User Baru') }}
@@ -35,7 +43,7 @@
                     </div>
 
                     @if (session('status'))
-                        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 2000)"
+                        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
                              x-transition.opacity.duration.500ms
                              class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                             <span class="block sm:inline">{{ session('status') }}</span>
@@ -57,6 +65,7 @@
                                     <th class="py-2 px-4 border-b">Nama</th>
                                     <th class="py-2 px-4 border-b">Email</th>
                                     <th class="py-2 px-4 border-b">Role</th>
+                                    <th class="py-2 px-4 border-b">Kepegawaian</th>
                                     <th class="py-2 px-4 border-b">Status</th>
                                     <th class="py-2 px-4 border-b">Gaji Pokok</th>
                                     <th class="py-2 px-4 border-b">Aksi</th>
@@ -68,6 +77,22 @@
                                         <td class="py-2 px-4 border-b text-left">{{ $user->name }}</td>
                                         <td class="py-2 px-4 border-b text-left">{{ $user->email }}</td>
                                         <td class="py-2 px-4 border-b">{{ ucfirst($user->role) }}</td>
+                                        <td class="py-2 px-4 border-b">
+                                            @if($user->role === 'karyawan' && $user->employment_type)
+                                                @php $sisaHari = $user->sisaHariKontrak(); @endphp
+                                                @if($user->employment_type === 'tetap')
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Tetap</span>
+                                                @elseif($sisaHari !== null && $sisaHari < 0)
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800" title="Kontrak berakhir {{ abs($sisaHari) }} hari lalu">Kontrak Berakhir</span>
+                                                @elseif($sisaHari !== null && $sisaHari <= 30)
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800" title="{{ $sisaHari }} hari lagi">Kontrak ({{ $sisaHari }} hr lagi)</span>
+                                                @else
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Kontrak</span>
+                                                @endif
+                                            @else
+                                                <span class="text-xs text-gray-400">—</span>
+                                            @endif
+                                        </td>
                                         <td class="py-2 px-4 border-b">
                                             @if($user->is_active)
                                                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Aktif</span>
@@ -90,7 +115,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center py-4">Tidak ada data user.</td>
+                                        <td colspan="7" class="text-center py-4">Tidak ada data user.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

@@ -92,6 +92,7 @@ Route::middleware('auth')->group(function () {
         Route::get('users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
         Route::put('users/{user}', [AdminUserController::class, 'update'])->name('users.update');
         Route::patch('users/{user}/toggle-status', [AdminUserController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::post('users/check-expired-contracts', [AdminUserController::class, 'checkExpiredContracts'])->name('users.check-expired-contracts');
         
         // Penggajian
         Route::get('payroll', [AdminPayrollController::class, 'index'])->name('payroll.index');

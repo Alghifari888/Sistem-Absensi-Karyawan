@@ -21,15 +21,83 @@
                             <li>**User Pelaku:** Siapa yang melakukan perubahan (misal: Admin atau Atasan).</li>
                             <li>**Aktivitas:** Tindakan yang dilakukan (misal: memproses cuti, memperbarui gaji).</li>
                             <li>**Detail Perubahan:** Menampilkan data sebelum (`Data Lama`) dan sesudah (`Data Baru`) perubahan untuk pelacakan yang akurat.</li>
+                            <li>Gunakan panel pencarian di bawah untuk menyaring log berdasarkan waktu, pelaku, jenis aktivitas, atau kata kunci di detail perubahan.</li>
                             <li>Log ini dibuat secara otomatis oleh sistem dan tidak dapat diubah demi menjaga integritas data.</li>
                         </ul>
                     </div>
                 </div>
             </div>
 
+            {{-- ====================================================== --}}
+            {{--                  PANEL FILTER PENCARIAN               --}}
+            {{-- ====================================================== --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6 text-gray-900">
+                    <form method="GET" action="{{ route('admin.audit-logs.index') }}">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+
+                            <!-- Dari Tanggal -->
+                            <div>
+                                <x-input-label for="date_from" :value="__('Dari Tanggal')" />
+                                <x-text-input id="date_from" class="block mt-1 w-full text-sm" type="date" name="date_from" :value="request('date_from')" />
+                            </div>
+
+                            <!-- Sampai Tanggal -->
+                            <div>
+                                <x-input-label for="date_to" :value="__('Sampai Tanggal')" />
+                                <x-text-input id="date_to" class="block mt-1 w-full text-sm" type="date" name="date_to" :value="request('date_to')" />
+                            </div>
+
+                            <!-- User Pelaku -->
+                            <div>
+                                <x-input-label for="user_id" :value="__('User Pelaku')" />
+                                <select id="user_id" name="user_id" class="block mt-1 w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="">Semua User</option>
+                                    @foreach ($users as $u)
+                                        <option value="{{ $u->id }}" @selected(request('user_id') == $u->id)>{{ $u->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Aktivitas -->
+                            <div>
+                                <x-input-label for="activity" :value="__('Aktivitas')" />
+                                <select id="activity" name="activity" class="block mt-1 w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="">Semua Aktivitas</option>
+                                    @foreach ($activities as $act)
+                                        <option value="{{ $act }}" @selected(request('activity') == $act)>{{ ucwords(str_replace('_', ' ', $act)) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Detail Perubahan (kata kunci) -->
+                            <div>
+                                <x-input-label for="detail" :value="__('Cari di Detail Perubahan')" />
+                                <x-text-input id="detail" class="block mt-1 w-full text-sm" type="text" name="detail" :value="request('detail')" placeholder="mis. nama, email..." />
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 mt-4">
+                            <x-primary-button type="submit">
+                                {{ __('Cari') }}
+                            </x-primary-button>
+                            @if(request()->anyFilled(['date_from', 'date_to', 'user_id', 'activity', 'detail']))
+                                <a href="{{ route('admin.audit-logs.index') }}" class="text-sm text-gray-500 hover:text-gray-700">
+                                    Reset Filter
+                                </a>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    
+
+                    <div class="mb-3 text-sm text-gray-500">
+                        Menampilkan {{ $logs->total() }} hasil.
+                    </div>
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full bg-white">
                             <thead class="bg-gray-200">
@@ -62,7 +130,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="text-center py-4">Tidak ada aktivitas tercatat.</td>
+                                        <td colspan="4" class="text-center py-4">Tidak ada aktivitas yang cocok dengan pencarian.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

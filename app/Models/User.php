@@ -14,11 +14,6 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -31,23 +26,16 @@ class User extends Authenticatable
         'deactivated_reason',
         'deactivated_at',
         'deactivated_by',
+        'employment_type',
+        'contract_start_date',
+        'contract_end_date',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -55,6 +43,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'deactivated_at' => 'datetime',
+            'contract_start_date' => 'date',
+            'contract_end_date' => 'date',
         ];
     }
 
@@ -73,34 +63,21 @@ class User extends Authenticatable
         return $this->role === 'karyawan';
     }
 
-    /**
-     * Relasi ke model Attendance. Satu user bisa punya banyak absensi.
-     */
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
     }
 
-    /**
-     * Relasi ke semua pengajuan cuti/izin milik user ini.
-     */
     public function leaves(): HasMany
     {
         return $this->hasMany(Leave::class);
     }
 
-    /**
-     * Relasi ke admin yang menonaktifkan akun ini (kalau ada).
-     */
     public function deactivatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deactivated_by');
     }
 
-    /**
-     * Hitung sisa kuota cuti tahunan (tipe 'cuti' saja, tahun berjalan).
-     * Dihitung dinamis dari data yang sudah disetujui, bukan counter tersimpan.
-     */
     public function sisaKuotaCuti(): int
     {
         $terpakai = $this->leaves()
@@ -111,5 +88,18 @@ class User extends Authenticatable
             ->sum(fn (Leave $leave) => $leave->total_days);
 
         return max(0, $this->leave_quota - $terpakai);
+    }
+
+    /**
+     * Sisa hari kontrak. Null kalau bukan karyawan kontrak / tidak ada tanggal.
+     * Positif = masih berjalan, negatif = sudah lewat tapi belum di-nonaktifkan otomatis.
+     */
+    public function sisaHariKontrak(): ?int
+    {
+        if ($this->employment_type !== 'kontrak' || ! $this->contract_end_date) {
+            return null;
+        }
+
+        return (int) now()->startOfDay()->diffInDays($this->contract_end_date, false);
     }
 }
