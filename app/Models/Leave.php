@@ -21,6 +21,11 @@ class Leave extends Model
         'status',
         'approved_by',
         'approver_notes',
+        'is_read',
+    ];
+
+    protected $casts = [
+        'is_read' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -33,9 +38,6 @@ class Leave extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
-    /**
-     * Jumlah hari pengajuan (inklusif tanggal mulai & selesai).
-     */
     public function getTotalDaysAttribute(): int
     {
         return Carbon::parse($this->start_date)->diffInDays(Carbon::parse($this->end_date)) + 1;

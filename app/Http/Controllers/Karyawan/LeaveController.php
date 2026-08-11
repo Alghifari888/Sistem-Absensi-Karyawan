@@ -11,21 +11,20 @@ use Carbon\Carbon;
 
 class LeaveController extends Controller
 {
-    /**
-     * Menampilkan riwayat pengajuan cuti/izin.
-     */
     public function index()
     {
         $leaves = Leave::where('user_id', Auth::id())
                         ->orderBy('start_date', 'desc')
                         ->paginate(10);
 
+        // Tandai semua pengajuan milik user ini sebagai sudah dibaca (menghilangkan badge notifikasi)
+        Leave::where('user_id', Auth::id())
+             ->where('is_read', false)
+             ->update(['is_read' => true]);
+
         return view('karyawan.leaves.index', compact('leaves'));
     }
 
-    /**
-     * Menampilkan form pengajuan baru.
-     */
     public function create()
     {
         $sisaKuota = Auth::user()->sisaKuotaCuti();
@@ -33,9 +32,6 @@ class LeaveController extends Controller
         return view('karyawan.leaves.create', compact('sisaKuota'));
     }
 
-    /**
-     * Menyimpan pengajuan baru ke database.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -46,7 +42,6 @@ class LeaveController extends Controller
             'proof_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
-        // Validasi kuota HANYA untuk tipe 'cuti' (cuti tahunan)
         if ($request->type === 'cuti') {
             $totalDays = Carbon::parse($request->start_date)
                 ->diffInDays(Carbon::parse($request->end_date)) + 1;

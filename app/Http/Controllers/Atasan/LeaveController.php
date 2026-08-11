@@ -41,6 +41,7 @@ class LeaveController extends Controller
             'status' => $request->status,
             'approver_notes' => $request->approver_notes,
             'approved_by' => Auth::id(),
+            'is_read' => false, // Tandai belum dibaca karyawan, memicu notifikasi
         ]);
 
         return redirect()->route('atasan.leaves.index')->with('status', 'Pengajuan berhasil diproses.');

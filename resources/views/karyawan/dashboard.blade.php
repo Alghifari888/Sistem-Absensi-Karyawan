@@ -11,11 +11,24 @@
             <div class="p-6 text-gray-900">
                 <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">
                     Selamat datang, {{ Auth::user()->name }}!
-                <!--Point sisa kuota cuti-->
-                    <p class="text-sm text-gray-500 text-center mb-4">
-                     Sisa kuota cuti tahunan Anda: <strong>{{ Auth::user()->sisaKuotaCuti() }} hari</strong>
-                    </p>
                 </h3>
+
+                <p class="text-sm text-gray-500 text-center mb-4">
+                    Sisa kuota cuti tahunan Anda: <strong>{{ Auth::user()->sisaKuotaCuti() }} hari</strong>
+                </p>
+
+                {{-- Notifikasi Pengajuan Baru Diproses --}}
+                @php $totalUnread = Auth::user()->unreadNotificationsCount(); @endphp
+                @if($totalUnread > 0)
+                    <div class="bg-yellow-50 border border-yellow-300 text-yellow-800 text-sm rounded-md p-3 mb-4 text-center">
+                        🔔 Anda punya <strong>{{ $totalUnread }}</strong> pengajuan yang baru saja diproses.
+                        Cek halaman
+                        <a href="{{ route('karyawan.leaves.index') }}" class="underline font-semibold">Cuti & Izin</a>
+                        atau
+                        <a href="{{ route('karyawan.overtime.index') }}" class="underline font-semibold">Lembur</a>
+                        untuk detailnya.
+                    </div>
+                @endif
 
                 {{-- Tampilkan Notifikasi --}}
                 @if (session('status'))
@@ -46,7 +59,6 @@
                         <p class="text-lg font-semibold">Absensi Hari Ini: {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
                         <p id="clock" class="text-4xl font-bold my-2"></p>
                         
-                        {{-- Status Absensi --}}
                         @if ($todayAttendance && $todayAttendance->check_out_time)
                             <p class="text-blue-600 font-semibold">Anda sudah menyelesaikan absensi hari ini.</p>
                             <p class="text-sm">Masuk: {{ \Carbon\Carbon::parse($todayAttendance->check_in_time)->format('H:i') }} | Pulang: {{ \Carbon\Carbon::parse($todayAttendance->check_out_time)->format('H:i') }}</p>
@@ -54,11 +66,9 @@
                             <p class="text-green-600 font-semibold">Anda sudah absen masuk pada jam {{ \Carbon\Carbon::parse($todayAttendance->check_in_time)->format('H:i') }}</p>
                         @endif
 
-                        {{-- Tombol Aksi & Form --}}
                         @if (!$todayAttendance || !$todayAttendance->check_out_time)
                             <div id="scanner-container" class="w-full max-w-sm mx-auto my-4 text-center" style="display: none;">
                                 <div id="qr-reader" class="border-2 border-dashed rounded-lg p-2"></div>
-                                {{-- Tombol Tutup Kamera --}}
                                 <button type="button" id="close-scanner-button" class="mt-4 inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     Tutup Kamera
                                 </button>
@@ -124,7 +134,6 @@
     </div>
 
     @push('scripts')
-    {{-- Library untuk QR Scanner --}}
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -174,7 +183,7 @@
                         (error) => { /* Abaikan error scan, biarkan kamera terus berjalan */ }
                     ).catch(err => {
                         alert("Tidak dapat memulai kamera. Pastikan Anda memberikan izin.");
-                        stopScanner(); // Hentikan jika gagal memulai
+                        stopScanner();
                     });
                 });
             }
@@ -184,10 +193,7 @@
             }
 
             function onScanSuccess(decodedText, decodedResult) {
-                // Hentikan scanner setelah berhasil
                 stopScanner();
-                
-                // Isi form dan submit
                 document.getElementById('qr_token').value = decodedText;
                 
                 navigator.geolocation.getCurrentPosition(position => {
@@ -196,7 +202,7 @@
                     document.getElementById('attendance-form').submit();
                 }, () => {
                     alert('Gagal mendapatkan lokasi GPS. Pastikan izin lokasi aktif.');
-                    scanButton.style.display = 'inline-flex'; // Munculkan lagi tombol scan jika GPS gagal
+                    scanButton.style.display = 'inline-flex';
                 });
             }
         });

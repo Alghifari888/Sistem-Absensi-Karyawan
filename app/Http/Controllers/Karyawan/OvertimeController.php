@@ -9,33 +9,27 @@ use Illuminate\Support\Facades\Auth;
 
 class OvertimeController extends Controller
 {
-    /**
-     * Menampilkan riwayat pengajuan lembur karyawan.
-     */
     public function index()
     {
-        // Ambil data lembur hanya untuk user yang sedang login, urutkan dari yang terbaru
         $overtimes = Overtime::where('user_id', Auth::id())
                             ->orderBy('overtime_date', 'desc')
                             ->paginate(10);
 
+        // Tandai semua pengajuan milik user ini sebagai sudah dibaca (menghilangkan badge notifikasi)
+        Overtime::where('user_id', Auth::id())
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
+
         return view('karyawan.overtime.index', compact('overtimes'));
     }
 
-    /**
-     * Menampilkan form untuk membuat pengajuan lembur baru.
-     */
     public function create()
     {
         return view('karyawan.overtime.create');
     }
 
-    /**
-     * Menyimpan pengajuan lembur baru ke database.
-     */
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'overtime_date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
@@ -43,14 +37,13 @@ class OvertimeController extends Controller
             'reason' => 'required|string|max:255',
         ]);
 
-        // Buat pengajuan lembur baru
         Overtime::create([
             'user_id' => Auth::id(),
             'overtime_date' => $request->overtime_date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
             'reason' => $request->reason,
-            'status' => 'pending', // Status awal selalu pending
+            'status' => 'pending',
         ]);
 
         return redirect()->route('karyawan.overtime.index')->with('status', 'Pengajuan lembur berhasil dibuat.');

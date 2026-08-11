@@ -6,43 +6,30 @@ use App\Http\Controllers\Controller;
 use App\Models\Overtime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // Pastikan baris ini ada
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class OvertimeController extends Controller
 {
-    use AuthorizesRequests; // Dan pastikan baris ini juga ada
+    use AuthorizesRequests;
 
-    /**
-     * Menampilkan daftar semua pengajuan lembur.
-     */
     public function index()
     {
-        // Otorisasi menggunakan Policy: hanya atasan yang bisa melihat.
         $this->authorize('viewAny', Overtime::class);
 
-        // Ambil semua data lembur, urutkan dari yang terbaru
         $overtimes = Overtime::with('user')->orderBy('created_at', 'desc')->paginate(10);
 
         return view('atasan.overtime.index', compact('overtimes'));
     }
 
-    /**
-     * Menampilkan form untuk memproses (approve/reject) pengajuan.
-     */
     public function edit(Overtime $overtime)
     {
-        // Otorisasi menggunakan Policy: hanya atasan yang bisa melihat detail.
         $this->authorize('view', $overtime);
 
         return view('atasan.overtime.edit', compact('overtime'));
     }
 
-    /**
-     * Mengupdate status pengajuan lembur.
-     */
     public function update(Request $request, Overtime $overtime)
     {
-        // Otorisasi menggunakan Policy: hanya atasan yang bisa mengupdate.
         $this->authorize('update', $overtime);
 
         $request->validate([
@@ -53,7 +40,8 @@ class OvertimeController extends Controller
         $overtime->update([
             'status' => $request->status,
             'approver_notes' => $request->approver_notes,
-            'approved_by' => Auth::id(), // Catat siapa yang memproses
+            'approved_by' => Auth::id(),
+            'is_read' => false, // Tandai belum dibaca karyawan, memicu notifikasi
         ]);
 
         return redirect()->route('atasan.overtime.index')->with('status', 'Pengajuan lembur berhasil diproses.');

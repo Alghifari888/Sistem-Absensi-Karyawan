@@ -19,19 +19,18 @@ class Overtime extends Model
         'status',
         'approved_by',
         'approver_notes',
+        'is_read',
     ];
 
-    /**
-     * Relasi ke user yang mengajukan lembur.
-     */
+    protected $casts = [
+        'is_read' => 'boolean',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Relasi ke user (atasan) yang memproses pengajuan.
-     */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');

@@ -73,6 +73,14 @@ class User extends Authenticatable
         return $this->hasMany(Leave::class);
     }
 
+    /**
+     * Relasi ke semua pengajuan lembur milik user ini.
+     */
+    public function overtimes(): HasMany
+    {
+        return $this->hasMany(Overtime::class);
+    }
+
     public function deactivatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deactivated_by');
@@ -90,10 +98,6 @@ class User extends Authenticatable
         return max(0, $this->leave_quota - $terpakai);
     }
 
-    /**
-     * Sisa hari kontrak. Null kalau bukan karyawan kontrak / tidak ada tanggal.
-     * Positif = masih berjalan, negatif = sudah lewat tapi belum di-nonaktifkan otomatis.
-     */
     public function sisaHariKontrak(): ?int
     {
         if ($this->employment_type !== 'kontrak' || ! $this->contract_end_date) {
@@ -101,5 +105,29 @@ class User extends Authenticatable
         }
 
         return (int) now()->startOfDay()->diffInDays($this->contract_end_date, false);
+    }
+
+    /**
+     * Jumlah pengajuan cuti yang baru diproses atasan tapi belum dilihat user ini.
+     */
+    public function unreadLeavesCount(): int
+    {
+        return $this->leaves()->where('is_read', false)->count();
+    }
+
+    /**
+     * Jumlah pengajuan lembur yang baru diproses atasan tapi belum dilihat user ini.
+     */
+    public function unreadOvertimesCount(): int
+    {
+        return $this->overtimes()->where('is_read', false)->count();
+    }
+
+    /**
+     * Total notifikasi belum dibaca (cuti + lembur).
+     */
+    public function unreadNotificationsCount(): int
+    {
+        return $this->unreadLeavesCount() + $this->unreadOvertimesCount();
     }
 }
