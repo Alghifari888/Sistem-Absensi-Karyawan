@@ -32,6 +32,33 @@
                 @endforeach
             </div>
 
+            {{-- Peringatan Kontrak Hampir Habis --}}
+            @if($expiringContracts->isNotEmpty())
+                <div class="bg-amber-50 border-l-4 border-amber-500 rounded-2xl shadow-md p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-lg font-bold text-amber-900">Peringatan Kontrak Hampir Habis ({{ $expiringContracts->count() }})</h3>
+                        <a href="{{ route('admin.users.index') }}" class="text-sm font-semibold text-amber-800 hover:underline">Kelola User →</a>
+                    </div>
+                    <div class="space-y-2">
+                        @foreach($expiringContracts as $emp)
+                            @php $sisa = $emp->sisaHariKontrak(); @endphp
+                            <div class="flex flex-wrap items-center justify-between bg-white px-4 py-2.5 rounded-lg border border-amber-200 text-sm">
+                                <div>
+                                    <span class="font-semibold text-gray-900">{{ $emp->name }}</span>
+                                    <span class="text-gray-500 ml-2">Berakhir: {{ $emp->contract_end_date->format('d/m/Y') }}</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $sisa < 0 ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800' }}">
+                                        {{ $sisa < 0 ? 'Lewat ' . abs($sisa) . ' hari' : ($sisa === 0 ? 'Hari ini' : $sisa . ' hari lagi') }}
+                                    </span>
+                                    <a href="{{ route('admin.users.edit', $emp) }}" class="text-indigo-600 hover:underline font-medium">Edit</a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             {{-- Panel Aktivitas Terbaru --}}
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
                 <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 pb-2">Aktivitas Terbaru</h3>

@@ -83,8 +83,15 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsActive::class])->gro
             $pendingLeaves = Leave::where('status', 'pending')->count();
             $pendingOvertimes = Overtime::where('status', 'pending')->count();
             $recentLogs = AuditLog::with('user')->latest()->take(5)->get();
+            $expiringContracts = User::where('role', 'karyawan')
+                ->where('employment_type', 'kontrak')
+                ->where('is_active', true)
+                ->whereNotNull('contract_end_date')
+                ->whereDate('contract_end_date', '<=', now()->addDays(30)->toDateString())
+                ->orderBy('contract_end_date')
+                ->get();
 
-            return view('admin.dashboard', compact('totalKaryawan', 'totalAtasan', 'pendingLeaves', 'pendingOvertimes', 'recentLogs'));
+            return view('admin.dashboard', compact('totalKaryawan', 'totalAtasan', 'pendingLeaves', 'pendingOvertimes', 'recentLogs', 'expiringContracts'));
         })->name('dashboard');
         
         // Manajemen User
@@ -142,8 +149,10 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsActive::class])->gro
             return view('karyawan.dashboard', compact('todayAttendance'));
         })->name('dashboard');
         
-        // Absensi
+        // Absensi & Slip Gaji Mandiri
+        Route::get('/attendance', [AttendanceController::class, 'history'])->name('attendance.index');
         Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+        Route::get('/payslip', [AttendanceController::class, 'payslip'])->name('payslip');
         
         // Pengajuan Lembur
         Route::get('overtime', [KaryawanOvertimeController::class, 'index'])->name('overtime.index');

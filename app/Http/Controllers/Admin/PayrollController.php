@@ -17,45 +17,13 @@ class PayrollController extends Controller
      */
     public function index(Request $request)
     {
-        // PERBAIKAN: Konversi input bulan dan tahun menjadi angka (integer)
-        $bulan = (int)$request->input('bulan', now()->month);
-        $tahun = (int)$request->input('tahun', now()->year);
-
-        $jamMasukSetting = \App\Models\Setting::where('key', 'jam_masuk')->value('value') ?? '08:00:00';
+        $bulan = max(1, min(12, (int) $request->input('bulan', now()->month)));
+        $tahun = max(2000, min(2100, (int) $request->input('tahun', now()->year)));
 
         $employees = User::where('role', 'karyawan')->get();
-        $payrollData = [];
-
-        foreach ($employees as $employee) {
-            $totalOvertimeHours = Overtime::where('user_id', $employee->id)
-                ->where('status', 'approved')
-                ->whereMonth('overtime_date', $bulan)
-                ->whereYear('overtime_date', $tahun)
-                ->get()
-                ->reduce(function ($carry, $item) {
-                    $start = Carbon::parse($item->start_time);
-                    $end = Carbon::parse($item->end_time);
-                    return $carry + $end->diffInHours($start);
-                }, 0);
-            
-            $totalAttendanceDays = Attendance::where('user_id', $employee->id)
-                ->whereMonth('attendance_date', $bulan)
-                ->whereYear('attendance_date', $tahun)
-                ->count();
-
-            $gajiPokok = $employee->gaji_pokok;
-            $upahLembur = $totalOvertimeHours * $employee->tarif_lembur_per_jam;
-            $gajiTotal = $gajiPokok + $upahLembur;
-
-            $payrollData[] = [
-                'user' => $employee,
-                'total_kehadiran' => $totalAttendanceDays,
-                'total_jam_lembur' => $totalOvertimeHours,
-                'gaji_pokok' => $gajiPokok,
-                'upah_lembur' => $upahLembur,
-                'gaji_total' => $gajiTotal,
-            ];
-        }
+        $payrollData = $employees
+            ->map(fn (User $employee) => self::calculateMonthlyPayroll($employee, $bulan, $tahun))
+            ->all();
 
         return view('admin.payroll.index', compact('payrollData', 'bulan', 'tahun'));
     }
@@ -65,10 +33,14 @@ class PayrollController extends Controller
      */
     public function generatePayslip(Request $request, User $user)
     {
-        // PERBAIKAN: Konversi input bulan dan tahun menjadi angka (integer)
-        $bulan = (int)$request->input('bulan', now()->month);
-        $tahun = (int)$request->input('tahun', now()->year);
+        $bulan = max(1, min(12, (int) $request->input('bulan', now()->month)));
+        $tahun = max(2000, min(2100, (int) $request->input('tahun', now()->year)));
 
+        return self::downloadPayslipForUser($user, $bulan, $tahun);
+    }
+
+    public static function calculateMonthlyPayroll(User $user, int $bulan, int $tahun): array
+    {
         $totalOvertimeHours = Overtime::where('user_id', $user->id)
             ->where('status', 'approved')
             ->whereMonth('overtime_date', $bulan)
@@ -79,29 +51,34 @@ class PayrollController extends Controller
                 $end = Carbon::parse($item->end_time);
                 return $carry + $end->diffInHours($start);
             }, 0);
-        
+
         $totalAttendanceDays = Attendance::where('user_id', $user->id)
             ->whereMonth('attendance_date', $bulan)
             ->whereYear('attendance_date', $tahun)
             ->count();
 
-        $gajiPokok = $user->gaji_pokok;
-        $upahLembur = $totalOvertimeHours * $user->tarif_lembur_per_jam;
-        $gajiTotal = $gajiPokok + $upahLembur;
+        $gajiPokok = $user->gaji_pokok ?? 0;
+        $upahLembur = $totalOvertimeHours * ($user->tarif_lembur_per_jam ?? 0);
 
-        $data = [
+        return [
             'user' => $user,
-            'bulan' => \Carbon\Carbon::create()->month($bulan)->translatedFormat('F'),
-            'tahun' => $tahun,
             'total_kehadiran' => $totalAttendanceDays,
             'total_jam_lembur' => $totalOvertimeHours,
             'gaji_pokok' => $gajiPokok,
             'upah_lembur' => $upahLembur,
-            'gaji_total' => $gajiTotal,
+            'gaji_total' => $gajiPokok + $upahLembur,
         ];
-        
-        $pdf = Pdf::loadView('admin.payroll.payslip', $data);
+    }
 
-        return $pdf->download('slip-gaji-' . $user->name . '-' . $bulan . '-' . $tahun . '.pdf');
+    public static function downloadPayslipForUser(User $user, int $bulan, int $tahun)
+    {
+        $payroll = self::calculateMonthlyPayroll($user, $bulan, $tahun);
+        $payroll['bulan'] = Carbon::create()->month($bulan)->translatedFormat('F');
+        $payroll['tahun'] = $tahun;
+
+        $pdf = Pdf::loadView('admin.payroll.payslip', $payroll);
+        $safeName = \Illuminate\Support\Str::slug($user->name) ?: 'karyawan';
+
+        return $pdf->download("slip-gaji-{$safeName}-{$bulan}-{$tahun}.pdf");
     }
 }

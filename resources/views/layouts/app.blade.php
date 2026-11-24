@@ -34,6 +34,10 @@
 
                     {{-- Menu Khusus Karyawan --}}
                     @if(auth()->user()->isKaryawan())
+                        <x-sidebar-link :href="route('karyawan.attendance.index')" :active="request()->routeIs('karyawan.attendance.*')">
+                            <x-heroicon-s-calendar-days class="w-6 h-6 mr-3" />
+                            <span>Riwayat & Slip Gaji</span>
+                        </x-sidebar-link>
                         <x-sidebar-link :href="route('karyawan.overtime.index')" :active="request()->routeIs('karyawan.overtime.*')">
                              <x-heroicon-s-clock class="w-6 h-6 mr-3" />
                             <span>Lembur</span>

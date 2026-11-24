@@ -6,9 +6,9 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
 </p>
 
-# 💼 Sistem Absensi & Penggajian Karyawan (Laravel 12)
+# 💼 Sistem Absensi & Penggajian Karyawan (Laravel 13)
 
-Selamat datang di Sistem Absensi & HRIS, sebuah aplikasi web komprehensif yang dibangun dari nol menggunakan Laravel 12. Proyek ini dirancang sebagai studi kasus nyata untuk mendemonstrasikan implementasi arsitektur Laravel yang bersih, aman, dan profesional.
+Selamat datang di Sistem Absensi & HRIS, sebuah aplikasi web komprehensif yang dibangun dari nol menggunakan Laravel 13. Proyek ini dirancang sebagai studi kasus nyata untuk mendemonstrasikan implementasi arsitektur Laravel yang bersih, aman, dan profesional.
 
 Aplikasi ini mengelola alur kerja esensial manajemen sumber daya manusia, mulai dari absensi harian dengan validasi canggih, alur persetujuan lembur dan cuti, hingga perhitungan gaji otomatis yang siap cetak dalam format PDF. Semua disajikan dalam antarmuka yang modern, responsif, dan intuitif berkat Tailwind CSS.
 
@@ -31,9 +31,9 @@ Sistem ini dilengkapi dengan serangkaian fitur komprehensif untuk manajemen kary
 
 ### 👤 Autentikasi Multi-Role
 Sistem login yang aman dengan tiga tingkat akses berbeda:
-- **Admin**: Memiliki akses penuh ke seluruh sistem, termasuk manajemen pengguna dan pengaturan.
+- **Admin**: Memiliki akses penuh ke seluruh sistem, termasuk manajemen pengguna (status aktif/nonaktif & masa kontrak), **Peringatan Kontrak Hampir Habis** di Dashboard, dan pengaturan.
 - **Atasan**: Dapat menyetujui atau menolak pengajuan lembur dan cuti dari bawahannya.
-- **Karyawan**: Dapat melakukan absensi, melihat riwayat, dan mengajukan lembur atau cuti.
+- **Karyawan**: Dapat melakukan absensi, melihat **Riwayat Absensi & Download Slip Gaji Mandiri (PDF)**, serta mengajukan lembur atau cuti.
 
 ### ✅ Absensi Real-time dengan Validasi Canggih
 - **Validasi QR Code**: Kode QR unik yang digenerate setiap hari untuk mencegah kecurangan.
@@ -45,8 +45,8 @@ Sistem login yang aman dengan tiga tingkat akses berbeda:
 - Kemampuan untuk mengunggah dokumen pendukung (misalnya, surat sakit).
 
 ### 💰 Penggajian Otomatis
-- Perhitungan gaji yang akurat berdasarkan data kehadiran, potongan, dan total jam lembur.
-- Fitur cetak Slip Gaji individual dalam format PDF yang profesional.
+- Perhitungan gaji berdasarkan **Gaji Pokok + Upah Lembur** (dari pengajuan lembur yang disetujui).
+- Fitur cetak Slip Gaji individual dalam format PDF yang profesional (oleh Admin maupun mandiri oleh Karyawan).
 
 ### 📊 Pelaporan & Audit
 - Laporan Absensi Bulanan per karyawan.
@@ -58,11 +58,11 @@ Sistem login yang aman dengan tiga tingkat akses berbeda:
 ## 🛠️ Teknologi yang Digunakan
 | Komponen       | Teknologi                               |
 |----------------|-----------------------------------------|
-| Backend        | PHP 8.2, Laravel 12                     |
+| Backend        | PHP 8.3+, Laravel 13                    |
 | Frontend       | Blade, Tailwind CSS, Alpine.js          |
-| Database       | MySQL / MariaDB                         |
+| Database       | MySQL / MariaDB (atau SQLite)           |
 | Server Lokal   | XAMPP / Laragon                         |
-| Library Utama  | laravel/breeze, barryvdh/laravel-dompdf |
+| Library Utama  | laravel/breeze, barryvdh/laravel-dompdf, simplesoftwareio/simple-qrcode, blade-ui-kit/blade-heroicons |
 
 ## 🚀 Panduan Instalasi
 
@@ -76,7 +76,7 @@ Langkah-langkah ini ditujukan untuk menyiapkan lingkungan pengembangan di mesin 
 
 #### Prasyarat
 Pastikan perangkat lunak berikut sudah terinstal di komputer Anda:
-- **PHP 8.2+**: [Download PHP](https://www.php.net/downloads.php)
+- **PHP 8.3+**: [Download PHP](https://www.php.net/downloads.php)
 - **Composer**: [Get Composer](https://getcomposer.org/download/)
 - **Node.js 16+** (beserta npm): [Download Node.js](https://nodejs.org/)
 - **Server Database** (MySQL 5.7+ atau MariaDB): [XAMPP](https://www.apachefriends.org/index.html) atau [Laragon](https://laragon.org/) adalah pilihan populer.
@@ -103,9 +103,10 @@ Pastikan perangkat lunak berikut sudah terinstal di komputer Anda:
     cp .env.example .env
     php artisan key:generate
     ```
+    > **Catatan:** Pastikan `APP_NAME="Sistem Absensi"` di `.env` diapit tanda kutip karena mengandung spasi.
 
 4.  **Setup Database**
-    - Buat sebuah database baru di server MySQL Anda (misalnya, melalui phpMyAdmin) dengan nama `db_sistem_absensi`.
+    - Default `.env.example` menggunakan `sqlite`. Jika ingin menggunakan **MySQL**, buat database baru di server MySQL Anda (misalnya, melalui phpMyAdmin) dengan nama `db_sistem_absensi`.
     - Buka file `.env` dan sesuaikan konfigurasinya:
     ```env
     DB_CONNECTION=mysql
@@ -129,17 +130,17 @@ Pastikan perangkat lunak berikut sudah terinstal di komputer Anda:
     ```
 
 7.  **Jalankan Server Pengembangan**
-    - **Terminal 1 (Vite):** Meng-compile aset CSS & JS.
+    - **Cara praktis (1 terminal):**
       ```bash
-      npm run dev
+      composer run dev
       ```
-    - **Terminal 2 (Server Laravel):** Menjalankan aplikasi.
-      ```bash
-      php artisan serve
-      ```
+      *(Catatan Windows: proses `[logs]` dari `laravel/pail` akan berhenti karena membutuhkan ekstensi `pcntl`, hal ini normal dan server/Vite tetap berjalan.)*
+    - **Atau manual (2 terminal):**
+      - **Terminal 1 (Vite):** Meng-compile aset CSS & JS (`npm run dev`).
+      - **Terminal 2 (Server Laravel):** Menjalankan aplikasi (`php artisan serve`).
 
-8.  **Akses Aplikasi**
-    Buka `http://127.0.0.1:8000` di browser Anda.
+8.  **Akses Aplikasi & Pengaturan Awal**
+    Buka `http://127.0.0.1:8000` di browser Anda, login sebagai **Admin**, lalu isi **Pengaturan Sistem** (jam masuk/pulang, koordinat kantor, dan radius absensi) sebelum karyawan melakukan absensi.
 
 ---
 
@@ -213,28 +214,33 @@ Metode ini bersifat manual jika tidak ada akses terminal.
 Setelah instalasi dan seeding berhasil, Anda dapat login menggunakan akun berikut:
 
 -   **Admin**
-    -   **Email:** `admin@example.com`
-    -   **Password:** `password`
+    -   **Email:** `admin@gmail.com`
+    -   **Password:** `Admin1234!`
 
 -   **Atasan**
-    -   **Email:** `atasan@example.com`
-    -   **Password:** `password`
+    -   **Email:** `atasan@gmail.com`
+    -   **Password:** `Atasan1234!`
 
 -   **Karyawan**
-    -   **Email:** `karyawan@example.com`
-    -   **Password:** `password`
+    -   **Email:** `karyawan@gmail.com`
+    -   **Password:** `Karyawan1234!`
 
 ## 📁 Struktur Folder & File
 ```
 sistem-absensi/
 ├── app/
+│   ├── Console/
+│   │   └── Commands/       # Command QR harian & cek kontrak berakhir
+│   ├── Helpers/            # Helper perhitungan jarak GPS (Haversine)
 │   ├── Http/
 │   │   ├── Controllers/
 │   │   │   ├── Admin/      # Controller untuk admin
 │   │   │   ├── Atasan/     # Controller untuk atasan
 │   │   │   └── Karyawan/   # Controller untuk karyawan
+│   │   └── Middleware/     # Middleware role & status aktif user
 │   ├── Models/             # Model database
-│   └── Observers/          # Model observers
+│   ├── Observers/          # Model observers (audit log)
+│   └── Policies/           # Policy otorisasi cuti & lembur
 ├── database/
 │   ├── migrations/         # Skema database
 │   └── seeders/            # Data awal

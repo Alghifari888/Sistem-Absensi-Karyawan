@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admin\PayrollController;
 use App\Models\Attendance;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -11,6 +12,31 @@ use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
+    public function history(Request $request)
+    {
+        $bulan = max(1, min(12, (int) $request->input('bulan', now()->month)));
+        $tahun = max(2000, min(2100, (int) $request->input('tahun', now()->year)));
+
+        $jamMasukSetting = Setting::where('key', 'jam_masuk')->value('value') ?? '08:00:00';
+
+        $attendances = Attendance::where('user_id', Auth::id())
+            ->whereMonth('attendance_date', $bulan)
+            ->whereYear('attendance_date', $tahun)
+            ->orderBy('attendance_date', 'desc')
+            ->get();
+
+        $payroll = PayrollController::calculateMonthlyPayroll(Auth::user(), $bulan, $tahun);
+
+        return view('karyawan.attendance.index', compact('attendances', 'bulan', 'tahun', 'jamMasukSetting', 'payroll'));
+    }
+
+    public function payslip(Request $request)
+    {
+        $bulan = max(1, min(12, (int) $request->input('bulan', now()->month)));
+        $tahun = max(2000, min(2100, (int) $request->input('tahun', now()->year)));
+
+        return PayrollController::downloadPayslipForUser(Auth::user(), $bulan, $tahun);
+    }
     /**
      * Store a newly created resource in storage.
      *
