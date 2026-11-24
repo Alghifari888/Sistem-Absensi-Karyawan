@@ -24,22 +24,18 @@ class SettingController extends Controller
      */
     public function update(Request $request)
     {
-        // Daftar semua key yang diharapkan dari form
-        $keys = [
-            'jam_masuk',
-            'jam_pulang',
-            'radius_absensi',
-            'lokasi_kantor_lat',
-            'lokasi_kantor_lon',
-        ];
+        $validated = $request->validate([
+            'jam_masuk' => ['required', 'regex:/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/'],
+            'jam_pulang' => ['required', 'regex:/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/', 'after:jam_masuk'],
+            'radius_absensi' => ['required', 'integer', 'min:10', 'max:50000'],
+            'lokasi_kantor_lat' => ['required', 'numeric', 'between:-90,90'],
+            'lokasi_kantor_lon' => ['required', 'numeric', 'between:-180,180'],
+        ]);
 
-        foreach ($keys as $key) {
-            // updateOrCreate akan mencari berdasarkan 'key',
-            // jika ada, akan di-update 'value'-nya.
-            // jika tidak ada, akan dibuat record baru.
+        foreach ($validated as $key => $value) {
             Setting::updateOrCreate(
                 ['key' => $key],
-                ['value' => $request->input($key)]
+                ['value' => $value]
             );
         }
 

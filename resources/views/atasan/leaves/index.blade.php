@@ -55,7 +55,7 @@
                                         <td class="py-2 px-4 border-b">{{ \Carbon\Carbon::parse($leave->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($leave->end_date)->format('d/m/Y') }}</td>
                                         <td class="py-2 px-4 border-b">
                                             @if($leave->proof_document)
-                                                <a href="{{ asset('storage/' . $leave->proof_document) }}" target="_blank" class="text-blue-600 hover:underline">Lihat</a>
+                                                <a href="{{ route('leaves.proof', $leave) }}" target="_blank" class="text-blue-600 hover:underline">Lihat</a>
                                             @else
                                                 -
                                             @endif

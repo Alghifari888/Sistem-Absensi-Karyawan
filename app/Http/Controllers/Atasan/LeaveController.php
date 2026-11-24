@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Leave;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class LeaveController extends Controller
@@ -37,12 +38,33 @@ class LeaveController extends Controller
             'approver_notes' => 'nullable|string|max:255',
         ]);
 
-        $leave->update([
-            'status' => $request->status,
-            'approver_notes' => $request->approver_notes,
-            'approved_by' => Auth::id(),
-            'is_read' => false, // Tandai belum dibaca karyawan, memicu notifikasi
-        ]);
+        $error = DB::transaction(function () use ($request, $leave) {
+            $lockedLeave = Leave::whereKey($leave->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedLeave->status !== 'pending') {
+                return 'Pengajuan ini sudah diproses sebelumnya.';
+            }
+
+            if ($request->status === 'approved' && $lockedLeave->type === 'cuti') {
+                $sisaKuota = $lockedLeave->user->sisaKuotaCuti();
+                if ($lockedLeave->total_days > $sisaKuota) {
+                    return "Sisa kuota cuti karyawan ({$sisaKuota} hari) tidak mencukupi untuk {$lockedLeave->total_days} hari.";
+                }
+            }
+
+            $lockedLeave->update([
+                'status' => $request->status,
+                'approver_notes' => $request->approver_notes,
+                'approved_by' => Auth::id(),
+                'is_read' => false, // Tandai belum dibaca karyawan, memicu notifikasi
+            ]);
+
+            return null;
+        });
+
+        if ($error) {
+            return redirect()->route('atasan.leaves.index')->with('error', $error);
+        }
 
         return redirect()->route('atasan.leaves.index')->with('status', 'Pengajuan berhasil diproses.');
     }

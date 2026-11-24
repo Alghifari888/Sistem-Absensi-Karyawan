@@ -21,7 +21,7 @@ class AttendanceController extends Controller
     {
         // 1. Validasi Input Dasar
         $request->validate([
-            'location' => 'required|string',
+            'location' => ['required', 'string', 'regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'],
             'qr_token' => 'required|string',
         ]);
 
@@ -40,19 +40,24 @@ class AttendanceController extends Controller
         // Ambil semua pengaturan sekaligus untuk efisiensi
         $settings = Setting::all()->keyBy('key');
 
-        // 3. Validasi Jarak Lokasi (GPS)
+        // 3. Validasi Jarak Lokasi (GPS) — fail-closed jika koordinat kantor belum disetel
         $lokasiKantorLat = $settings['lokasi_kantor_lat']->value ?? null;
         $lokasiKantorLon = $settings['lokasi_kantor_lon']->value ?? null;
-        $radiusAbsensi = $settings['radius_absensi']->value ?? 100; // Default 100 meter
+        $radiusAbsensi = (int) ($settings['radius_absensi']->value ?? 100);
 
-        list($latitude, $longitude) = explode(',', $request->location);
-        
-        if ($lokasiKantorLat && $lokasiKantorLon) {
-            $jarak = calculateDistance($latitude, $longitude, $lokasiKantorLat, $lokasiKantorLon);
+        if (!is_numeric($lokasiKantorLat) || !is_numeric($lokasiKantorLon)) {
+            return Redirect::back()->with('error', 'Lokasi kantor belum diatur oleh admin. Silakan hubungi admin.');
+        }
 
-            if ($jarak > $radiusAbsensi) {
-                return Redirect::back()->with('error', "Anda berada di luar radius. Jarak Anda " . round($jarak) . " meter dari kantor.");
-            }
+        [$latitude, $longitude] = array_map('floatval', explode(',', $request->location));
+        if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
+            return Redirect::back()->with('error', 'Koordinat lokasi tidak valid.');
+        }
+
+        $jarak = calculateDistance($latitude, $longitude, (float) $lokasiKantorLat, (float) $lokasiKantorLon);
+
+        if ($jarak > $radiusAbsensi) {
+            return Redirect::back()->with('error', "Anda berada di luar radius. Jarak Anda " . round($jarak) . " meter dari kantor.");
         }
         
         // 4. Validasi Waktu & Proses Absensi

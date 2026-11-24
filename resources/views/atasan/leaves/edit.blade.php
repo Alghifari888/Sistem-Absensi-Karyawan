@@ -35,7 +35,7 @@
                                     <dt class="text-sm font-medium text-gray-500">Dokumen Bukti</dt>
                                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                         @if($leave->proof_document)
-                                            <a href="{{ asset('storage/' . $leave->proof_document) }}" target="_blank" class="text-blue-600 hover:underline">Lihat Dokumen</a>
+                                            <a href="{{ route('leaves.proof', $leave) }}" target="_blank" class="text-blue-600 hover:underline">Lihat Dokumen</a>
                                         @else
                                             Tidak ada
                                         @endif

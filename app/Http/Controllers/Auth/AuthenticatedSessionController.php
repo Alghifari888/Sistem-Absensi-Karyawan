@@ -46,7 +46,7 @@ class AuthenticatedSessionController extends Controller
             $defaultUrl = route('karyawan.dashboard');
         }
 
-        $targetUrl = redirect()->intended($defaultUrl)->getTargetUrl();
+        $targetUrl = \Illuminate\Support\Js::from(redirect()->intended($defaultUrl)->getTargetUrl());
 
         $html = <<<HTML
         <!DOCTYPE html>
@@ -72,7 +72,7 @@ class AuthenticatedSessionController extends Controller
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     didOpen: () => { Swal.showLoading(); }
-                }).then(() => { window.location.href = "{$targetUrl}"; });
+                }).then(() => { window.location.href = {$targetUrl}; });
             </script>
         </body>
         </html>

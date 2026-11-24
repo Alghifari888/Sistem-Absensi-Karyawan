@@ -14,6 +14,10 @@ class SettingObserver
      */
     public function created(Setting $setting): void
     {
+        if (str_starts_with($setting->key, 'qr_token_')) {
+            return;
+        }
+
         $this->recordAudit($setting, 'membuat_pengaturan', null, $setting->getAttributes());
     }
 
@@ -22,6 +26,10 @@ class SettingObserver
      */
     public function updated(Setting $setting): void
     {
+        if (str_starts_with($setting->key, 'qr_token_')) {
+            return;
+        }
+
         $changes = $setting->getChanges();
         unset($changes['updated_at']);
 

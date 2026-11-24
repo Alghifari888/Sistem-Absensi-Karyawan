@@ -74,11 +74,15 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        abort_if($user->isAdmin(), 403);
+
         return view('admin.users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
     {
+        abort_if($user->isAdmin(), 403);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => [

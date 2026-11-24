@@ -32,6 +32,10 @@ class OvertimeController extends Controller
     {
         $this->authorize('update', $overtime);
 
+        if ($overtime->status !== 'pending') {
+            return redirect()->route('atasan.overtime.index')->with('error', 'Pengajuan lembur ini sudah diproses sebelumnya.');
+        }
+
         $request->validate([
             'status' => 'required|in:approved,rejected',
             'approver_notes' => 'nullable|string|max:255',

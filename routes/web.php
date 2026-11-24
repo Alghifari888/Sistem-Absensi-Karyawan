@@ -61,11 +61,13 @@ Route::get('/dashboard', function () {
     }
     // Fallback jika tidak ada role
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', \App\Http\Middleware\EnsureUserIsActive::class, 'verified'])->name('dashboard');
 
 
 // GROUPING ROUTE UNTUK SEMUA USER YANG SUDAH LOGIN
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\EnsureUserIsActive::class])->group(function () {
+    // Unduh/lihat dokumen bukti cuti secara privat (terotorisasi oleh LeavePolicy::view)
+    Route::get('/leaves/{leave}/proof', [KaryawanLeaveController::class, 'showProof'])->name('leaves.proof');
     // Route untuk Profile (bawaan Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

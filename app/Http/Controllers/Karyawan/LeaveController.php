@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Leave;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
@@ -57,7 +58,7 @@ class LeaveController extends Controller
 
         $filePath = null;
         if ($request->hasFile('proof_document')) {
-            $filePath = $request->file('proof_document')->store('proofs', 'public');
+            $filePath = $request->file('proof_document')->store('proofs', 'local');
         }
 
         Leave::create([
@@ -71,5 +72,14 @@ class LeaveController extends Controller
         ]);
 
         return redirect()->route('karyawan.leaves.index')->with('status', 'Pengajuan berhasil dibuat.');
+    }
+
+    public function showProof(Leave $leave)
+    {
+        Gate::authorize('view', $leave);
+
+        abort_unless($leave->proof_document && Storage::disk('local')->exists($leave->proof_document), 404);
+
+        return Storage::disk('local')->response($leave->proof_document);
     }
 }
